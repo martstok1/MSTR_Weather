@@ -10,15 +10,15 @@ Config.General = {
     Locale = 'nl', -- nl/en; saved headadmin setting takes precedence
     -- Development/admin commands used while V1.0 is being built.
     DebugCommand = 'mstrdebug',
-    WeatherCommand = 'mstrweather',
-    TimeCommand = 'mstrtime',
-    BlackoutCommand = 'mstrblackout',
+    --WeatherCommand = 'mstrweather',
+    --TimeCommand = 'mstrtime',
+    --BlackoutCommand = 'mstrblackout',
     MenuCommand = 'mstrmenu'
 }
 
 Config.Branding = {
     Name = 'MSTR Weather',
-    Logo = 'images/default.svg', -- or images/myserver.png / images/myserver.webp
+    Logo = 'images/myLogo.png', -- or images/myserver.png / images/myserver.webp
     ShowName = true
 }
 
