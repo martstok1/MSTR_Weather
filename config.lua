@@ -18,7 +18,7 @@ Config.General = {
 
 Config.Branding = {
     Name = 'MSTR Weather',
-    Logo = 'images/myLogo.png', -- or images/myserver.png / images/myserver.webp
+    Logo = 'images/default.svg', -- or images/myserver.png / images/myserver.webp
     ShowName = true
 }
 
