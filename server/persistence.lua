@@ -1,5 +1,5 @@
 -- Resource-local JSON persistence for MSTR_Weather
--- Phase 5: Blackout + Persistence
+-- Validated environment storage with backup recovery.
 
 MSTR = MSTR or {}
 MSTR.Persistence = MSTR.Persistence or {}

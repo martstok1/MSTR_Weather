@@ -1,15 +1,15 @@
 -- MSTR_Weather configuration
--- V1.0 development: Foundation + Weather + Time + Dynamic Weather + Blackout + Persistence
+-- Version 1.0.0
 
 Config = {}
 
--- Enables detailed console logging. /mstrdebug works independently of this value.
+-- Enables detailed console logging. Optional health command is configured below.
 Config.Debug = false
 
 Config.General = {
     Locale = 'nl', -- nl/en; saved headadmin setting takes precedence
-    -- Development/admin commands used while V1.0 is being built.
-    DebugCommand = 'mstrdebug',
+    -- Optional admin commands: false disables registration; a name enables it.
+    DebugCommand = false,
     WeatherCommand = false, -- false disables registration; a name enables it
     TimeCommand = false,
     BlackoutCommand = false,
@@ -140,7 +140,6 @@ Config.DynamicWeather = {
     Enabled = true,
 
     -- Minutes between automatic weather decisions.
-    -- For development testing you can temporarily use e.g. 0.1 (= 6 seconds).
     IntervalMinutes = 15,
 
     -- Safety bounds for the scheduler.

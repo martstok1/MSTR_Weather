@@ -1,24 +1,41 @@
-# Runtime state
+# Runtime-opslag
 
-This directory must remain present and writable by FXServer.
+Deze map moet blijven bestaan en beschrijfbaar zijn door FXServer.
 
-`state.json` and `state.json.bak` are generated at runtime and are deliberately
-excluded from Git. A fresh installation uses `config.lua` defaults.
+`state.json`, `state.json.bak`, `admin.json` en `admin.json.bak` worden tijdens
+gebruik aangemaakt en zijn uitgesloten van Git. Lever deze bestanden niet mee
+aan andere servers: beheeropslag bevat spelersidentifiers en rechten.
 
-Before updating an existing installation, stop the resource normally and back up
-both files outside the resource directory. Restore them after copying/checking out
-the update if you want to keep your existing environment settings.
+Stop vóór een update de resource normaal en maak buiten de resource een backup
+van alle vier de bestanden. Behoud ze bij het bijwerken van de code.
 
-The primary JSON stores version 1, accepted weather, dynamic mode, blackout,
-freeze, scale and resolved whole game hours/minutes. If a smooth transition is
-active, the target weather is saved and restored instantly after restart.
-Seconds, transition progress and offline elapsed time are not persisted.
+## Omgeving
 
-A missing/invalid primary file falls back to a valid `.bak`, then config defaults.
-The backup contains the previous successful state (the first save seeds both).
-Writes are debounced; failures get up to three attempts and an explicit warning.
-A normal stop flushes live state. A process crash can lose changes since the last
-successful save; there is no periodic disk-write loop.
+`state.json` bewaart weer, dynamisch weer, blackout, bevriezen, tijdsnelheid en
+hele uren/minuten. Tijdens een overgang wordt het doelweer opgeslagen en na
+herstart direct toegepast. Seconden, overgangsvoortgang en offline verstreken
+tijd worden niet bewaard.
 
-To deliberately reset to config defaults: stop the resource first, then remove
-both runtime files, then start it again. Removing only the primary restores backup.
+Bij een ontbrekende of ongeldige primary probeert de resource een geldige backup
+en daarna de defaults. Writes worden gebundeld en gecontroleerd door teruglezen.
+Mislukte omgevingswrites worden maximaal drie keer geprobeerd, met een melding.
+Een normale stop bewaart de actuele omgeving. Een crash kan wijzigingen sinds de
+laatste geslaagde write verliezen.
+
+Om uitsluitend de omgeving te resetten: stop de resource, maak een backup en
+verwijder bewust zowel `state.json` als `state.json.bak`. Alleen de primary
+verwijderen kan de backup terugladen. Beheerinstellingen blijven van toepassing.
+
+## Beheer en rechten
+
+`admin.json` bewaart gedeelde instellingen, servertaal en gebruikersrechten,
+ook wanneer omgevingsopslag uitstaat. Deze instellingen hebben voorrang op de
+overeenkomstige configuratiedefaults.
+
+Beschadigde beheeropslag, of een ontbrekende primary terwijl een backup bestaat,
+blokkeert gewone toegang en beheerschrijfacties. Hoofdadmins kunnen nog kijken.
+Er is geen automatische backuprestore: die kan ingetrokken rechten herstellen.
+Stop de resource en herstel bewust een gecontroleerde geldige versie.
+
+Verwijder niet zomaar beide beheerbestanden: dan gelden opnieuw defaults en
+gewone ACE-rechten. Bewaar backups buiten de resource.

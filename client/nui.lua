@@ -1,4 +1,4 @@
--- Phase 6A: focus/lifecycle and read-only transport, never environment authority.
+-- NUI focus, lifecycle and request transport; the server owns environment state.
 local ready, wanted = false, false
 local generation, sequence, pending = 0, 0, nil
 local lastResponse = 0
