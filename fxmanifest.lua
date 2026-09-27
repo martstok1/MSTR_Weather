@@ -28,6 +28,7 @@ server_scripts {
     'server/state.lua',
     'server/weather_engine.lua',
     'server/time_engine.lua',
+    'server/admin.lua',
     'server/nui.lua',
     'server/server.lua'
 }
@@ -36,6 +37,7 @@ client_scripts {
     'client/weather.lua',
     'client/time.lua',
     'client/blackout.lua',
+    'client/settings.lua',
     'client/nui.lua',
     'client/client.lua'
 }
@@ -46,5 +48,7 @@ files {
     'web/index.html',
     'web/style.css',
     'web/theme.js',
+    'web/icons.js',
+    'web/controls.js',
     'web/app.js'
 }

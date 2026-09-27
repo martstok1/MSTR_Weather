@@ -22,7 +22,8 @@ Config.Branding = {
 }
 
 Config.Permissions = {
-    Admin = 'mstr.weather.admin'
+    Admin = 'mstr.weather.admin', -- legacy access to ordinary weather/time controls
+    SuperAdmin = 'mstr.weather.superadmin' -- assign to your own identifier in permissions.cfg
 }
 
 Config.Weather = {

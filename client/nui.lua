@@ -2,8 +2,13 @@
 local ready, wanted = false, false
 local generation, sequence, pending = 0, 0, nil
 local lastResponse = 0
+local actionSequence, actionPending = 0, nil
 
 local function Close()
+    if actionPending then
+        actionPending.cb({ ok = false, reason = 'closed' })
+        actionPending = nil
+    end
     wanted, pending = false, nil
     generation = generation + 1
     SetNuiFocus(false, false)
@@ -24,6 +29,34 @@ end)
 RegisterNUICallback('close', function(_, cb)
     Close()
     cb({ ok = true })
+end)
+
+RegisterNUICallback('action', function(data, cb)
+    if not wanted or type(data) ~= 'table' or type(data.action) ~= 'string'
+        or #data.action > 24 or type(data.payload) ~= 'table' then
+        cb({ ok = false, reason = 'closed' }); return
+    end
+    if actionPending then cb({ ok = false, reason = 'busy' }); return end
+    actionSequence = actionSequence % 2147483647 + 1
+    local request = { id = actionSequence, cb = cb }
+    actionPending = request
+    TriggerServerEvent('mstr_weather:server:uiAction', request.id, data.action, data.payload)
+    CreateThread(function()
+        Wait(10000)
+        if actionPending == request then
+            actionPending = nil
+            cb({ ok = false, reason = 'timeout' })
+        end
+    end)
+end)
+
+RegisterNetEvent('mstr_weather:client:uiAction', function(payload)
+    if source ~= 65535 or type(payload) ~= 'table' or not actionPending
+        or actionPending.id ~= payload.requestId then return end
+    local cb = actionPending.cb
+    actionPending = nil
+    cb(payload)
+    if payload.snapshot and payload.snapshot.allowed == false then Close() end
 end)
 
 RegisterNetEvent('mstr_weather:client:uiSnapshot', function(payload)
