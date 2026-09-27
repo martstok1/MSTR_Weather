@@ -18,7 +18,7 @@ Config.General = {
 
 Config.Branding = {
     Name = 'MSTR Weather',
-    Logo = 'images/logo.png',
+    Logo = 'images/default.svg', -- or images/myserver.png / images/myserver.webp
     ShowName = true
 }
 
@@ -176,4 +176,10 @@ Config.Persistence = {
 
     -- Multiple state changes in quick succession are batched into one write.
     DebounceMs = 1500
+}
+
+-- Session-only audit history; no database, disk writes or polling thread.
+Config.Logging = {
+    Enabled = true,
+    MaxEntries = 200 -- validated range: 10–1000; oldest entries are discarded
 }

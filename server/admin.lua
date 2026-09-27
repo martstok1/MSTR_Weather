@@ -133,8 +133,12 @@ function Admin.UpdateSettings(player, settings, revision)
     if revision ~= data.revision then return false, 'conflict' end
     if not ValidSettings(settings) then return false, 'invalid' end
     local candidate = { version = 1, revision = data.revision + 1, users = data.users, settings = settings }
+    local previous = Admin.GetSettings()
     local ok, reason = Save(candidate)
-    if ok then ApplySettings(settings, true) end
+    if ok then
+        ApplySettings(settings, true)
+        MSTR.Logging.Record('settings', previous, settings, { player = player, origin = 'nui' })
+    end
     return ok, reason
 end
 
@@ -149,8 +153,11 @@ function Admin.UpdateUser(player, identifier, name, permissions, revision)
     for id, user in pairs(data.users) do users[id] = user; count = count + 1 end
     if not users[identifier] and count >= 256 then return false, 'limit' end
     -- Retain explicit all-false entries: deleting them could restore legacy ACE access.
+    local previous = { identifier = identifier, user = data.users[identifier] }
     users[identifier] = { name = name, rights = permissions }
-    return Save({ version = 1, revision = data.revision + 1, users = users, settings = data.settings })
+    local ok, reason = Save({ version = 1, revision = data.revision + 1, users = users, settings = data.settings })
+    if ok then MSTR.Logging.Record('user', previous, { identifier = identifier, user = users[identifier] }, { player = player, origin = 'nui' }) end
+    return ok, reason
 end
 
 function Admin.GetPanel(player)

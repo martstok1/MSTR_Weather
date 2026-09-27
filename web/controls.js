@@ -67,6 +67,7 @@
       if (result.snapshot) window.MSTRReceiveSnapshot(result.snapshot);
       if (generation !== current || el('app').hidden) return;
       if (result.panel && capabilities.manage) renderPanel(result.panel);
+      if (result.logs && capabilities.manage) window.MSTRLogs.render(result.logs, Boolean(payload.before));
       el('action-status').textContent = result.ok ? (action === 'panel' ? 'Beheer geladen.' : 'Door de server bevestigd.') : (messages[result.reason] || 'Actie niet uitgevoerd.');
     } catch {
       if (generation === current) el('action-status').textContent = messages.timeout;
@@ -105,10 +106,11 @@
       capabilities = snapshot.permissions || {};
       document.querySelectorAll('[data-permission]').forEach(element => { element.hidden = !capabilities[element.dataset.permission]; });
       if (!capabilities.manage) {
+        window.MSTRLogs?.reset();
         panel = null; selectedUsers.clear(); el('admin-content').hidden = true;
         el('user-select').replaceChildren(new Option('Nieuwe persoon / identifier invoeren', ''));
         fillUser();
-        if (!el('admin').hidden) document.querySelector('[data-page="dashboard"]').click();
+        if (!el('admin').hidden || !el('logs').hidden) document.querySelector('[data-page="dashboard"]').click();
       }
       if (!initialized) {
         el('weather-choice').replaceChildren(...(snapshot.weatherTypes || []).map(type => new Option(type, type)));
@@ -124,10 +126,12 @@
       if (!snapshot.settings.instantAllowed) el('weather-mode').value = 'smooth';
       lockButtons();
     },
-    page(name) { if (name === 'admin' && capabilities.manage && !panel) send('panel'); },
+    send,
+    page(name) { if (name === 'admin' && capabilities.manage && !panel) send('panel'); if (name === 'logs' && capabilities.manage) send('logs'); },
     close() {
       generation++; busy = false; initialized = false; capabilities = {}; panel = null;
       selectedUsers.clear(); el('admin-content').hidden = true;
+      window.MSTRLogs?.reset();
       el('user-select').replaceChildren(new Option('Nieuwe persoon / identifier invoeren', ''));
       fillUser(); el('action-status').textContent = '';
       document.querySelectorAll('[data-permission]').forEach(element => { element.hidden = true; });

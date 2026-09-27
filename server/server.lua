@@ -34,6 +34,7 @@ MSTR.State.PublishSettings()
 MSTR.WeatherEngine.Initialize()
 MSTR.TimeEngine.Initialize()
 MSTR.Persistence.SetReady()
+MSTR.Logging.Record('startup', nil, MSTR.State.GetSnapshot(), { origin = 'startup' })
 
 local syncRequestTimes = {}
 
@@ -109,7 +110,7 @@ RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source,
             return
         end
 
-        if not MSTR.WeatherEngine.SetDynamicWeather(enabled) then
+        if not MSTR.WeatherEngine.SetDynamicWeather(enabled, { player = source, origin = 'command' }) then
             SendMessage(source, 'Failed to change Dynamic Weather state.')
             return
         end
@@ -135,7 +136,7 @@ RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source,
         return
     end
 
-    local success, reason = MSTR.WeatherEngine.SetWeather(weatherType, mode == 'instant')
+    local success, reason = MSTR.WeatherEngine.SetWeather(weatherType, mode == 'instant', { player = source, origin = 'command' })
     if not success then
         if reason == 'transitioning' then
             SendMessage(source, 'A weather transition is active. Wait for completion or use instant.')
@@ -172,7 +173,7 @@ RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
             return
         end
 
-        if not MSTR.TimeEngine.SetTimeFrozen(shouldFreeze) then
+        if not MSTR.TimeEngine.SetTimeFrozen(shouldFreeze, { player = source, origin = 'command' }) then
             SendMessage(source, 'Failed to change the frozen state.')
             return
         end
@@ -189,7 +190,7 @@ RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
             return
         end
 
-        if not MSTR.TimeEngine.SetTimeScale(newScale) then
+        if not MSTR.TimeEngine.SetTimeScale(newScale, { player = source, origin = 'command' }) then
             SendMessage(source, ('Scale must be between %s and %s.')
                 :format(tostring(Config.Time.MinCycleSpeed), tostring(Config.Time.MaxCycleSpeed)))
             return
@@ -205,7 +206,7 @@ RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
         return
     end
 
-    if not MSTR.TimeEngine.SetTime(hour, minute) then
+    if not MSTR.TimeEngine.SetTime(hour, minute, { player = source, origin = 'command' }) then
         SendMessage(source, 'Failed to set time.')
         return
     end
@@ -230,7 +231,7 @@ RegisterCommand(Config.General.BlackoutCommand or 'mstrblackout', function(sourc
         return
     end
 
-    if not MSTR.State.SetBlackout(enabled) then
+    if not MSTR.State.SetBlackout(enabled, { player = source, origin = 'command' }) then
         SendMessage(source, 'Failed to change blackout state.')
         return
     end

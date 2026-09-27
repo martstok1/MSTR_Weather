@@ -45,7 +45,7 @@ for (const language of ['nl', 'en']) {
 }
 // Every static label must have an explicit catalog entry (except language-neutral literals).
 const html = fs.readFileSync('web/index.html', 'utf8');
-const neutral = new Set(['◈', '01', '02', '03', '04', '05', 'Esc', '—', 'Champagne', 'Jade']);
+const neutral = new Set(['◈', '01', '02', '03', '04', '05', '06', 'Esc', '—', 'Champagne', 'Jade']);
 const decode = s => s.replaceAll('&amp;', '&').replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 for (const match of html.matchAll(/>([^<>]+)</g)) {
   const text = decode(match[1].trim());

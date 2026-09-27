@@ -25,6 +25,7 @@ shared_scripts {
 
 server_scripts {
     'server/permissions.lua',
+    'server/logging.lua',
     'server/persistence.lua',
     'server/state.lua',
     'server/weather_engine.lua',
@@ -50,6 +51,11 @@ files {
     'web/style.css',
     'web/theme.js',
     'web/locales.js',
+    'web/branding.js',
+    'web/logs.js',
+    'images/default.svg',
+    'images/*.png',
+    'images/*.webp',
     'web/icons.js',
     'web/controls.js',
     'web/app.js'

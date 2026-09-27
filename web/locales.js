@@ -48,7 +48,7 @@
     ['Achtergrondkleur kiezen', 'Achtergrondkleur kiezen', 'Choose background color'], ['Achtergrond hexcode', 'Achtergrond hexcode', 'Background hex code'],
     ['Paneelkleur kiezen', 'Paneelkleur kiezen', 'Choose panel color'], ['Panelen hexcode', 'Panelen hexcode', 'Panel hex code'],
     ['Persoonlijk thema', 'Persoonlijk thema', 'Personal theme'], ['Standaard herstellen', 'Standaard herstellen', 'Restore defaults'],
-    ['Hoofdadminbeheer', 'Hoofdadminbeheer', 'Head administrator'], ['Opnieuw laden', 'Opnieuw laden', 'Reload'],
+    ['Hoofdadminbeheer', 'Hoofdadminbeheer', 'Head administrator'], ['Logs', 'Logs', 'Logs'], ['AUDIT TRAIL', 'LOGBOEK', 'AUDIT TRAIL'], ['Hoofdadminacties en systeemwijzigingen uit deze resourcesessie.', 'Hoofdadminacties en systeemwijzigingen uit deze resourcesessie.', 'Administrator actions and system changes from this resource session.'], ['Oudere logs laden', 'Oudere logs laden', 'Load older logs'], ['Opnieuw laden', 'Opnieuw laden', 'Reload'],
     ['Alleen MSTR_Weather-rechten. Hoofdadminrechten worden uitsluitend buiten het menu via ACE toegekend.', 'Alleen MSTR_Weather-rechten. Hoofdadminrechten worden uitsluitend buiten het menu via ACE toegekend.', 'MSTR_Weather permissions only. Head administrator access is assigned outside this menu through ACE.'],
     ['Serverinstellingen', 'Serverinstellingen', 'Server settings'], ['Overgangsduur (seconden)', 'Overgangsduur (seconden)', 'Transition duration (seconds)'],
     ['Dynamic interval (minuten)', 'Dynamisch interval (minuten)', 'Dynamic interval (minutes)'],
@@ -129,6 +129,7 @@
     if (current !== slot.last) write(slot.last);
   }
   function visit(node) {
+    if (node.parentElement?.closest('[data-no-localize]')) return;
     if (node.nodeType === 3) { translate(node, 'text', () => node.nodeValue, v => { node.nodeValue = v; }); return; }
     if (node.nodeType !== 1 || ['SCRIPT', 'STYLE', 'SVG'].includes(node.tagName) || node.hasAttribute('data-no-localize')) return;
     for (const attr of ['aria-label', 'title']) if (node.hasAttribute(attr)) translate(node, attr, () => node.getAttribute(attr), v => node.setAttribute(attr, v));

@@ -161,12 +161,14 @@ function State.GetBlackout()
     return value == true
 end
 
-function State.SetBlackout(enabled)
+function State.SetBlackout(enabled, actor)
     if not MSTR.Utils.IsValidBoolean(enabled) then
         return false
     end
 
+    local previous = State.GetBlackout()
     GlobalState[KEYS.Blackout] = enabled
+    if previous ~= enabled then MSTR.Logging.Record('blackout', previous, enabled, actor) end
     return true
 end
 

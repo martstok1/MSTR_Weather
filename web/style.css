@@ -20,7 +20,10 @@ button { cursor: pointer; color: inherit; transition: transform .15s ease, borde
 button:focus-visible, input:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 button:hover { transform: translateY(-1px); }
 aside { color: var(--sidebar-text); background: var(--sidebar); padding: 32px 22px 24px; display: flex; flex-direction: column; border-right: 1px solid var(--sidebar-line); }
-.mark { width: 45px; height: 45px; display: grid; place-items: center; border: 1px solid var(--sidebar-line); border-radius: 12px; background: var(--accent); color: var(--accent-text); font-size: 30px; margin-bottom: 28px; }
+.brand-mark { width: 45px; height: 45px; display: grid; place-items: center; border: 1px solid var(--sidebar-line); border-radius: 12px; background: var(--accent); color: var(--accent-text); font-size: 30px; margin-bottom: 28px; overflow: hidden; }
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+#brand-name { overflow-wrap: anywhere; max-height: 100px; overflow-y: auto; }
+header { margin-bottom: 23px; }
 .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 2.1px; color: var(--muted); }
 aside .eyebrow { color: var(--sidebar-muted); }
 h1 { font-size: 22px; font-weight: 500; letter-spacing: -.6px; margin: 10px 0 34px; }
@@ -120,5 +123,11 @@ button:disabled { cursor: not-allowed; opacity: .5; transform: none; }
 .checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin: 20px 0; }
 .checks label { flex-direction: row; align-items: center; }
 .checks input { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--accent); }
+.logs-list { display: grid; gap: 10px; margin-top: 18px; }
+.log-entry { background: var(--surface); border: 1px solid var(--surface-line); border-radius: 9px; padding: 14px; color: var(--surface-text); }
+.log-header { display: flex; justify-content: space-between; gap: 15px; }
+.log-header time, .log-entry p { color: var(--surface-muted); font-size: 11px; }
+.log-entry p { margin: 8px 0; }
+.log-entry code { display: block; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--surface-text); font-size: 11px; }
 @media (max-width: 850px) { .weather-illustration { width: 90px; height: 90px; right: 18px; top: 45px; } .weather-hero .weather-name { max-width: 73%; } }
 @media (max-width: 600px) { .weather-illustration { position: static; width: 65px; height: 65px; margin-bottom: 12px; } .weather-hero .weather-name { max-width: 100%; } .checks { grid-template-columns: 1fr; } }
