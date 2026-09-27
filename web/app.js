@@ -40,6 +40,7 @@ document.querySelectorAll('[data-page]').forEach(button => {
 });
 
 window.MSTRReceiveSnapshot = p => {
+  if (p?.locale) window.MSTRLocale.set(p.locale);
   if (p && p.allowed === false) { hide(); return; }
   if (!p || p.allowed !== true || !p.state || !p.state.time || !p.state.weatherTransition || !p.settings) return;
   const s = p.state, c = p.settings;
@@ -51,15 +52,15 @@ window.MSTRReceiveSnapshot = p => {
     dynamic: yesNo(s.dynamicWeather),
     next: s.dynamicWeather && Number.isFinite(p.nextDynamicSeconds) ? `Over ${Math.ceil(p.nextDynamicSeconds)} s` : 'Geen countdown',
     blackout: yesNo(s.blackout), frozen: yesNo(s.timeFrozen), scale: `${s.timeScale}×`,
-    scaleRange: `${c.minScale}× – ${c.maxScale}×`, duration: `${c.transitionSeconds} seconden`,
-    instant: yesNo(c.instantAllowed), snow: yesNo(c.snowTrails), interval: `${c.dynamicIntervalMinutes} minuten`,
-    vehicles: yesNo(c.affectVehicles), persistence: yesNo(c.persistenceEnabled)
+    scaleRange: `${c.minScale}× – ${c.maxScale}×`,
+    daypart: window.MSTRDaypart(s.time.hour).label
   };
   document.querySelectorAll('[data-value]').forEach(element => { element.textContent = values[element.dataset.value] ?? '—'; });
   const wasHidden = app.hidden;
   app.hidden = false;
   window.MSTRControls.update(p);
   window.MSTRIcons(s);
+  window.MSTRLocale.refresh();
   receivedAt = Date.now();
   connection.textContent = '● Verbonden · serverupdate ontvangen';
   if (!statusTimer) statusTimer = setInterval(() => {

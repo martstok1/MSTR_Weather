@@ -13,7 +13,7 @@ end
 
 local function SendMessage(source, message)
     TriggerClientEvent('chat:addMessage', source, {
-        args = { 'MSTR_Weather', message }
+        args = { 'MSTR_Weather', MSTR.Locale.Translate(message) }
     })
 end
 

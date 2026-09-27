@@ -2,11 +2,12 @@
 local lastSnapshot, lastAction = {}, {}
 local function Snapshot(player)
     local permissions = MSTR.Permissions.GetCapabilities(player)
-    if not permissions.view then return { allowed = false } end
-    local settings = MSTR.Admin.GetSettings()
-    settings.minScale, settings.maxScale = Config.Time.MinCycleSpeed, Config.Time.MaxCycleSpeed
+    if not permissions.view then return { allowed = false, locale = Config.General.Locale } end
+    -- Only control constraints belong in ordinary snapshots; full settings are headadmin-only.
+    local settings = { minScale = Config.Time.MinCycleSpeed, maxScale = Config.Time.MaxCycleSpeed,
+        instantAllowed = Config.Weather.AllowInstantChange }
     return {
-        allowed = true, permissions = permissions, state = MSTR.State.GetSnapshot(),
+        allowed = true, locale = Config.General.Locale, permissions = permissions, state = MSTR.State.GetSnapshot(),
         transitionRemaining = MSTR.WeatherEngine.GetTransitionRemainingSeconds(),
         nextDynamicSeconds = MSTR.WeatherEngine.GetNextDynamicChangeSeconds(),
         settings = settings, weatherTypes = MSTR.Constants.WeatherTypes

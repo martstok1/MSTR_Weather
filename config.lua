@@ -7,6 +7,7 @@ Config = {}
 Config.Debug = false
 
 Config.General = {
+    Locale = 'nl', -- nl/en; saved headadmin setting takes precedence
     -- Development/admin commands used while V1.0 is being built.
     DebugCommand = 'mstrdebug',
     WeatherCommand = 'mstrweather',

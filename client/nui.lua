@@ -64,8 +64,9 @@ RegisterNetEvent('mstr_weather:client:uiSnapshot', function(payload)
     if not wanted or type(payload) ~= 'table' or payload.requestId ~= pending then return end
     pending = nil
     if payload.allowed ~= true then
+        if payload.locale == 'nl' or payload.locale == 'en' then Config.General.Locale = payload.locale end
         Close()
-        MSTR.Utils.Info('Geen toegang tot het menu (ACE vereist).')
+        MSTR.Utils.Info(MSTR.Locale.Translate('No access to the menu (permission required).'))
         return
     end
     if type(payload.state) ~= 'table' or type(payload.state.time) ~= 'table'
@@ -86,7 +87,7 @@ RegisterCommand(Config.General.MenuCommand, function()
         while wanted and generation == current do
             if MSTR.Utils.ElapsedMs(GetGameTimer(), lastResponse) >= 10000 then
                 Close()
-                MSTR.Utils.Warn('Menu gesloten: geen serverantwoord of NUI niet gereed. Probeer opnieuw.')
+                MSTR.Utils.Warn(MSTR.Locale.Translate('Menu closed: no server response or NUI not ready. Try again.'))
                 return
             end
             if ready and not pending then Request() end

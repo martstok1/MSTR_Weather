@@ -19,7 +19,8 @@ version '1.0.0'
 shared_scripts {
     'config.lua',
     'shared/constants.lua',
-    'shared/utils.lua'
+    'shared/utils.lua',
+    'shared/locales.lua'
 }
 
 server_scripts {
@@ -48,6 +49,7 @@ files {
     'web/index.html',
     'web/style.css',
     'web/theme.js',
+    'web/locales.js',
     'web/icons.js',
     'web/controls.js',
     'web/app.js'

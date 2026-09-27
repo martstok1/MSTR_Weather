@@ -254,6 +254,7 @@ end
 
 function State.PublishSettings()
     GlobalState['mstr:settings'] = {
+        locale = Config.General.Locale,
         snowTrails = Config.Weather.EnableSnowTrails,
         affectVehicles = Config.Blackout.AffectVehicles
     }

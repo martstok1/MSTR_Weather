@@ -30,6 +30,7 @@ function Admin.GetRevision() return data.revision end
 
 function Admin.GetSettings()
     return {
+        locale = Config.General.Locale,
         transitionSeconds = Config.Weather.TransitionDuration,
         instantAllowed = Config.Weather.AllowInstantChange,
         snowTrails = Config.Weather.EnableSnowTrails,
@@ -40,9 +41,10 @@ function Admin.GetSettings()
 end
 
 local function ValidSettings(s)
-    local keys = { transitionSeconds = true, instantAllowed = true, snowTrails = true,
+    local keys = { locale = true, transitionSeconds = true, instantAllowed = true, snowTrails = true,
         dynamicIntervalMinutes = true, affectVehicles = true, persistenceEnabled = true }
     return ExactKeys(s, keys)
+        and (s.locale == 'nl' or s.locale == 'en')
         and MSTR.Utils.IsValidNumber(s.transitionSeconds, 0, 300)
         and MSTR.Utils.IsValidNumber(s.dynamicIntervalMinutes, Config.DynamicWeather.MinIntervalMinutes, Config.DynamicWeather.MaxIntervalMinutes)
         and type(s.instantAllowed) == 'boolean' and type(s.snowTrails) == 'boolean'
@@ -50,6 +52,7 @@ local function ValidSettings(s)
 end
 
 local function ApplySettings(s, runtime)
+    Config.General.Locale = s.locale
     local intervalChanged = Config.DynamicWeather.IntervalMinutes ~= s.dynamicIntervalMinutes
     local persistenceChanged = Config.Persistence.Enabled ~= s.persistenceEnabled
     Config.Weather.TransitionDuration = s.transitionSeconds
@@ -75,6 +78,8 @@ local function Decode(raw)
     if not ok or not ExactKeys(value, { version = true, revision = true, users = true, settings = true })
         or value.version ~= 1 or not MSTR.Utils.IsValidInteger(value.revision, 0, 2147483646)
         or type(value.users) ~= 'table' or type(value.settings) ~= 'table' then return nil end
+    -- Upgrade old six-field settings in memory without changing existing grants.
+    if next(value.settings) and value.settings.locale == nil then value.settings.locale = Config.General.Locale end
     if next(value.settings) and not ValidSettings(value.settings) then return nil end
     local count = 0
     for identifier, user in pairs(value.users) do

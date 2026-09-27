@@ -6,7 +6,7 @@ local ClientWeather = MSTR.ClientWeather
 local applySerial = 0
 local synced = false
 local snowApplied = nil
-local rainWeathers = { RAIN = true, THUNDER = true, CLEARING = true, NEUTRAL = true }
+local rainWeathers = { RAIN = true, THUNDER = true, CLEARING = true, NEUTRAL = true, HALLOWEEN = true }
 
 local function ApplySnowEffects(weatherType)
     local snow = MSTR.Constants.SnowWeatherTypes[weatherType] == true

@@ -9,7 +9,7 @@ class Element {
   querySelector(selector) { return this.children[0] ||= new Element(); }
   replaceChildren(...children) { this.children = children; }
   add(child) { this.children.push(child); }
-  reportValidity() { return true; }
+  checkValidity() { return true; }
   click() { this.events.click?.(); }
   setAttribute(name, value) { this[name] = value; }
 }
@@ -75,5 +75,14 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   assert.doesNotMatch(el('weather-icon').innerHTML, /onerror/);
   assert.equal(el('blackout-icon').dataset.icon, 'bulbOff');
   assert.equal(el('dynamic-icon').dataset.icon, 'pause');
+  for (const [hour, kind] of [[0, 'night'], [4.99, 'night'], [5, 'sunrise'], [6.99, 'sunrise'], [7, 'sun'], [18.99, 'sun'], [19, 'sunset'], [20.99, 'sunset'], [21, 'night'], [23.99, 'night']]) {
+    assert.equal(context.window.MSTRDaypart(hour).icon, kind);
+    context.window.MSTRIcons({ weather: 'CLEAR', time: { hour } });
+    assert.equal(el('daypart-icon').dataset.icon, kind);
+  }
+  for (const [a, b] of [['CLOUDS','OVERCAST'], ['SMOG','FOGGY'], ['CLEARING','NEUTRAL'], ['SNOWLIGHT','SNOW'], ['SNOW','BLIZZARD']]) {
+    context.window.MSTRIcons({ weather: a }); const svg = el('weather-icon').innerHTML;
+    context.window.MSTRIcons({ weather: b }); assert.notEqual(svg, el('weather-icon').innerHTML);
+  }
   console.log('PASS controls: drafts, pending/late responses, revocation, safe names, errors and all weather/status SVGs');
 })().catch(error => { console.error(error); process.exitCode = 1; });

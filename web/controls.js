@@ -31,6 +31,7 @@
     el('admin-content').hidden = false;
     el('admin-storage-status').textContent = value.locked ? 'Beheeropslag is geblokkeerd. Herstel admin.json en herstart de resource.' : 'Gegevens geladen. Opslaan geldt direct en blijft behouden na een herstart.';
     const s = value.settings;
+    el('setting-locale').value = s.locale;
     el('setting-duration').value = s.transitionSeconds;
     el('setting-interval').value = s.dynamicIntervalMinutes;
     el('setting-interval').min = value.minInterval;
@@ -73,9 +74,14 @@
       if (generation === current) { busy = false; lockButtons(); }
     }
   }
-  const bindForm = (id, action, payload) => el(id).addEventListener('submit', event => {
-    event.preventDefault(); if (el(id).reportValidity()) send(action, payload());
-  });
+  const bindForm = (id, action, payload) => {
+    el(id).noValidate = true;
+    el(id).addEventListener('submit', event => {
+      event.preventDefault();
+      if (el(id).checkValidity()) send(action, payload());
+      else el('action-status').textContent = messages.invalid;
+    });
+  };
   bindForm('weather-form', 'weather', () => ({ weather: el('weather-choice').value, instant: el('weather-mode').value === 'instant' }));
   bindForm('time-form', 'time', () => ({ hour: Number(el('time-hour').value), minute: Number(el('time-minute').value) }));
   bindForm('scale-form', 'scale', () => ({ value: Number(el('time-scale').value) }));
@@ -83,6 +89,7 @@
     send(button.dataset.action, { value: button.dataset.enabled === 'true' });
   }));
   bindForm('server-settings-form', 'settings', () => ({ revision: panel?.revision, settings: {
+    locale: el('setting-locale').value,
     transitionSeconds: Number(el('setting-duration').value), dynamicIntervalMinutes: Number(el('setting-interval').value),
     instantAllowed: el('setting-instant').checked, snowTrails: el('setting-snow').checked,
     affectVehicles: el('setting-vehicles').checked, persistenceEnabled: el('setting-persistence').checked

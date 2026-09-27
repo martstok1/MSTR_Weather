@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Environment console</title>
   <link rel="stylesheet" href="style.css">
+  <script src="locales.js" defer></script>
   <script src="theme.js" defer></script>
   <script src="icons.js" defer></script>
   <script src="controls.js" defer></script>
@@ -51,7 +52,7 @@
         <div class="control-box" data-permission="blackout" hidden><h3>Blackout</h3><div class="button-row"><button data-action="blackout" data-enabled="true" data-mutation>Inschakelen</button><button data-action="blackout" data-enabled="false" data-mutation>Uitschakelen</button></div></div>
       </section>
       <section id="time" class="page" hidden>
-        <div class="hero"><div class="eyebrow">ACTUELE SERVERKLOK</div><div class="weather-name" data-value="clock">—</div><p>Momentopname, elke twee seconden bijgewerkt.</p></div>
+        <div class="hero time-hero"><div id="daypart-icon" class="weather-illustration" aria-hidden="true"></div><div class="eyebrow">ACTUELE SERVERKLOK</div><div class="weather-name" data-value="clock">—</div><p data-value="daypart">—</p><p>Momentopname, elke twee seconden bijgewerkt.</p></div>
         <dl><dt>Bevroren</dt><dd data-value="frozen">—</dd><dt>Tijdsnelheid</dt><dd data-value="scale">—</dd><dt>Toegestaan bereik</dt><dd data-value="scaleRange">—</dd></dl>
         <div data-permission="time" hidden>
           <form id="time-form" class="control-box"><h3>Tijd instellen</h3><div class="control-row"><label>Uur<input id="time-hour" type="number" min="0" max="23" step="1" required></label><label>Minuut<input id="time-minute" type="number" min="0" max="59" step="1" required></label><button type="submit" data-mutation>Toepassen</button></div></form>
@@ -74,10 +75,6 @@
           <div class="color-field"><label for="color-surface">Panelen</label><div class="color-input"><input type="color" id="color-surface" data-color="surface" value="#1e2126" aria-label="Paneelkleur kiezen"><input type="text" data-hex="surface" value="#1e2126" maxlength="7" aria-label="Panelen hexcode" spellcheck="false"></div></div>
         </div>
         <div class="theme-actions"><span id="theme-status" role="status" aria-live="polite">Persoonlijk thema</span><button type="button" id="theme-reset" class="quiet-button">Standaard herstellen</button></div>
-        <div class="settings-divider"></div>
-        <h3 class="section-title">Actieve serverconfiguratie</h3>
-        <p class="muted">De hoofdadmin kan deze waarden aanpassen onder Beheer.</p>
-        <dl><dt>Overgangsduur</dt><dd data-value="duration">—</dd><dt>Instant weer toegestaan</dt><dd data-value="instant">—</dd><dt>Sneeuwsporen</dt><dd data-value="snow">—</dd><dt>Dynamic interval</dt><dd data-value="interval">—</dd><dt>Blackout beïnvloedt voertuigen</dt><dd data-value="vehicles">—</dd><dt>Persistence ingeschakeld</dt><dd data-value="persistence">—</dd></dl>
       </section>
       <section id="admin" class="page" hidden>
         <div class="section-heading"><h3 class="section-title">Hoofdadminbeheer</h3><button id="admin-refresh" class="quiet-button" data-mutation>Opnieuw laden</button></div>
@@ -86,6 +83,8 @@
         <div id="admin-content" hidden>
           <form id="server-settings-form" class="control-box">
             <h3>Serverinstellingen</h3>
+            <label>Servertaal<select id="setting-locale"><option value="nl">Nederlands</option><option value="en">Engels</option></select></label>
+            <p>Deze taal geldt voor iedereen, ook na een herstart.</p>
             <div class="control-row"><label>Overgangsduur (seconden)<input id="setting-duration" type="number" min="0" max="300" step="any" required></label><label>Dynamic interval (minuten)<input id="setting-interval" type="number" step="any" required></label></div>
             <div class="checks"><label><input id="setting-instant" type="checkbox"> Instant weer toegestaan</label><label><input id="setting-snow" type="checkbox"> Sneeuwsporen</label><label><input id="setting-vehicles" type="checkbox"> Blackout beïnvloedt voertuigen</label><label><input id="setting-persistence" type="checkbox"> Weer en tijd bewaren</label></div>
             <p>Nieuwe overgangsduur geldt voor volgende overgangen. Een nieuw interval begint opnieuw te tellen. Uitschakelen van bewaren verwijdert geen bestaande opslag.</p>

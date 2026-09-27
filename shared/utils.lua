@@ -156,6 +156,7 @@ function Utils.ValidateConfig()
 
     boolean(Config, 'Debug', false)
     local general = group('General')
+    if general.Locale ~= 'nl' and general.Locale ~= 'en' then general.Locale = 'nl' end
     local commands = { DebugCommand = 'mstrdebug', WeatherCommand = 'mstrweather',
         TimeCommand = 'mstrtime', BlackoutCommand = 'mstrblackout', MenuCommand = 'mstrmenu' }
     local seen, invalidCommands = {}, false
