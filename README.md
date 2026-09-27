@@ -1,3 +1,6 @@
+<img width="1193" height="839" alt="image" src="https://github.com/user-attachments/assets/76f86406-a7ab-4981-9888-59aec1464c03" />
+
+
 # MSTR_Weather
 
 **Standalone weer- en tijdsbeheer voor FiveM · v1.0.0 · Martstok**
