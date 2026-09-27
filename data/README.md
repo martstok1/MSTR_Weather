@@ -1,41 +1,23 @@
-# Runtime-opslag
+# Runtime storage
 
-Deze map moet blijven bestaan en beschrijfbaar zijn door FXServer.
+This folder must remain present and writable by FXServer.
 
-`state.json`, `state.json.bak`, `admin.json` en `admin.json.bak` worden tijdens
-gebruik aangemaakt en zijn uitgesloten van Git. Lever deze bestanden niet mee
-aan andere servers: beheeropslag bevat spelersidentifiers en rechten.
+`state.json`, `state.json.bak`, `admin.json` and `admin.json.bak` are created automatically during runtime and are ignored by Git. Do not share these files with other servers: admin storage contains player identifiers and permissions.
 
-Stop vóór een update de resource normaal en maak buiten de resource een backup
-van alle vier de bestanden. Behoud ze bij het bijwerken van de code.
+Before updating the resource, stop it normally and create a backup outside the resource of all four files. Keep the backup until the new code has been confirmed to work correctly.
 
-## Omgeving
+## Environment
 
-`state.json` bewaart weer, dynamisch weer, blackout, bevriezen, tijdsnelheid en
-hele uren/minuten. Tijdens een overgang wordt het doelweer opgeslagen en na
-herstart direct toegepast. Seconden, overgangsvoortgang en offline verstreken
-tijd worden niet bewaard.
+`state.json` stores weather, dynamic weather, blackout, freeze state, time scale and whole hours/minutes. During a transition, the target weather is stored and applied immediately after restart. Seconds, transition progress and elapsed offline time are not saved.
 
-Bij een ontbrekende of ongeldige primary probeert de resource een geldige backup
-en daarna de defaults. Writes worden gebundeld en gecontroleerd door teruglezen.
-Mislukte omgevingswrites worden maximaal drie keer geprobeerd, met een melding.
-Een normale stop bewaart de actuele omgeving. Een crash kan wijzigingen sinds de
-laatste geslaagde write verliezen.
+If the primary file is missing or invalid, the resource attempts to load a valid backup and then falls back to defaults. Writes are batched and verified by reading them back. Failed environment writes are retried up to three times, with a single warning message. A normal stop saves the current environment. A crash may lose changes made since the last successful write.
 
-Om uitsluitend de omgeving te resetten: stop de resource, maak een backup en
-verwijder bewust zowel `state.json` als `state.json.bak`. Alleen de primary
-verwijderen kan de backup terugladen. Beheerinstellingen blijven van toepassing.
+To reset only the environment: stop the resource, create a backup and delete both `state.json` and `state.json.bak`. Deleting only the primary file may cause the backup to be loaded. Admin settings remain in effect.
 
-## Beheer en rechten
+## Administration and permissions
 
-`admin.json` bewaart gedeelde instellingen, servertaal en gebruikersrechten,
-ook wanneer omgevingsopslag uitstaat. Deze instellingen hebben voorrang op de
-overeenkomstige configuratiedefaults.
+`admin.json` stores shared settings, server language and user permissions, even when environment persistence is disabled. These settings take precedence over the corresponding configuration defaults.
 
-Beschadigde beheeropslag, of een ontbrekende primary terwijl een backup bestaat,
-blokkeert gewone toegang en beheerschrijfacties. Hoofdadmins kunnen nog kijken.
-Er is geen automatische backuprestore: die kan ingetrokken rechten herstellen.
-Stop de resource en herstel bewust een gecontroleerde geldige versie.
+Corrupted admin storage, or a missing primary file while a backup exists, blocks regular access and admin write operations. Superadmins can still view the system. **There is no automatic backup restore:** this could restore permissions that were previously revoked. Stop the resource and deliberately restore a known-good version.
 
-Verwijder niet zomaar beide beheerbestanden: dan gelden opnieuw defaults en
-gewone ACE-rechten. Bewaar backups buiten de resource.
+Do not simply delete both admin files, as defaults and regular ACE permissions will apply again. Keep backups outside the resource.

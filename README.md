@@ -1,198 +1,198 @@
-<img width="1193" height="839" alt="image" src="https://github.com/user-attachments/assets/76f86406-a7ab-4981-9888-59aec1464c03" />
+<img width="1185" height="821" alt="Screenshot_7" src="https://github.com/user-attachments/assets/c335da62-2575-4b3f-b372-f9cf3b7db8a0" />
 
 
 # MSTR_Weather
 
-**Standalone weer- en tijdsbeheer voor FiveM · v1.0.0 · Martstok**
+**Standalone weather and time management for FiveM · v1.0.0 · Martstok**
 
-Beheer het weer, de tijd en blackout vanuit één menu. MSTR_Weather synchroniseert de omgeving via de server en biedt afzonderlijke rechten per beheerder, Nederlandse en Engelse menuteksten en persoonlijke menukleuren.
+Manage weather, time and blackout from a single menu. MSTR_Weather synchronizes the environment through the server and provides separate permissions per administrator, Dutch and English menu text, and personal menu colors.
 
-## Functies
+## Features
 
-- Vijftien weertypes, direct wijzigen of geleidelijk overgaan.
-- Dynamisch weer met instelbaar interval en gewogen, logische vervolgstappen.
-- Tijd instellen, bevriezen, hervatten en versnellen of vertragen.
-- Blackout met instelbare invloed op voertuigverlichting.
-- Automatisch bewaren van omgeving, beheerinstellingen en toegangsrechten.
-- Hoofdadminpaneel met rechten per persoon en een gedeelde servertaal.
-- Persoonlijke thema's en aanpasbare naam en logo.
-- Begrensde actielog voor hoofdadmins.
-- Server-side rechtencontrole, invoervalidatie en verzoeklimieten.
+- Fifteen weather types, with instant changes or smooth transitions.
+- Dynamic weather with a configurable interval and weighted, logical follow-up transitions.
+- Set, freeze, resume, speed up or slow down time.
+- Blackout with configurable impact on vehicle lighting.
+- Automatic persistence of environment state, admin settings and access permissions.
+- Superadmin panel with per-user permissions and a shared server language.
+- Personal themes plus configurable server name and logo.
+- Bounded action log for superadmins.
+- Server-side permission checks, input validation and request rate limits.
 
-Geen ESX, QBCore, ox_lib, database of externe webdienst nodig. De interface wordt lokaal meegeleverd; er is geen buildstap nodig.
+No ESX, QBCore, ox_lib, database or external web service is required. The interface is included locally; no build step is needed.
 
-## Installatie
+## Installation
 
-1. Download of clone deze repository.
-2. Plaats de resource als `MSTR_Weather` in je resources-map. `fxmanifest.lua` moet direct in die map staan, niet in een extra submap.
-3. Laat de map `data/` bestaan en zorg dat FXServer hierin kan schrijven.
-4. Schakel andere weer- en tijdsynchronisatie uit, inclusief eventuele modules in admin- of frameworkresources.
-5. Stel je hoofdadminrechten in zoals hieronder.
-6. Voeg aan je geladen `resources.cfg` toe:
+1. Download or clone this repository.
+2. Place the resource as `MSTR_Weather` inside your resources folder. `fxmanifest.lua` must be directly inside that folder, not inside an additional subfolder.
+3. Keep the `data/` folder and make sure FXServer can write to it.
+4. Disable other weather and time synchronization resources, including any modules inside admin or framework resources.
+5. Configure your superadmin permissions as described below.
+6. Add the following to your loaded `resources.cfg`:
 
 ```cfg
 ensure MSTR_Weather
 ```
 
-Zorg dat je serverconfig `permissions.cfg` en `resources.cfg` daadwerkelijk uitvoert, met de permissies vóór het starten van de resource. Start vervolgens de server en open ingame `/mstrmenu`, of gebruik `mstrmenu` in F8.
+Make sure your server configuration actually executes `permissions.cfg` and `resources.cfg`, with permissions loaded before the resource starts. Then start the server and open `/mstrmenu` in-game, or use `mstrmenu` in F8.
 
-De resource past externe configuratiebestanden niet automatisch aan.
+The resource does not automatically modify external configuration files.
 
-## Toegang en hoofdadmin
+## Access and superadmin
 
-Zet in je geladen `permissions.cfg`:
+Add the following to your loaded `permissions.cfg`:
 
 ```cfg
-add_ace identifier.fivem:JOUW_FIVEM_ID mstr.weather.superadmin allow
+add_ace identifier.fivem:YOUR_FIVEM_ID mstr.weather.superadmin allow
 ```
 
-Vervang `JOUW_FIVEM_ID` door het numerieke deel van je eigen `fivem:`-identifier. Geef deze ACE alleen aan het bedoelde account. Bestaande brede ACE-regels of groepsrechten kunnen ook toegang geven.
+Replace `YOUR_FIVEM_ID` with the numeric part of your own `fivem:` identifier. Only grant this ACE to the intended account. Existing broad ACE rules or group permissions may also grant access.
 
-| Toegang | Mogelijkheden |
+| Access | Capabilities |
 | --- | --- |
-| Geen rechten | Ontvangt de gesynchroniseerde omgeving, kan het beheermenu niet gebruiken |
-| Gedelegeerde gebruiker | Alleen de aangevinkte onderdelen |
-| `mstr.weather.admin` | Gewone bediening, zonder hoofdadminpaneel of logs |
-| `mstr.weather.superadmin` | Alle bediening, beheerinstellingen, gebruikersrechten en logs |
+| No permissions | Receives the synchronized environment but cannot use the admin menu |
+| Delegated user | Only the explicitly enabled sections |
+| `mstr.weather.admin` | Regular controls, without the superadmin panel or logs |
+| `mstr.weather.superadmin` | Full control, admin settings, user permissions and logs |
 
-Voeg als hoofdadmin via **Beheer** een online speler toe of vul handmatig een `fivem:123456`-identifier of een lowercase `license:` met 40 hextekens in. Stel per persoon de rechten in voor menu bekijken, weer, tijd, dynamisch weer en blackout.
+As a superadmin, add an online player through **Management**, or manually enter a `fivem:123456` identifier or a lowercase `license:` followed by 40 hexadecimal characters. Set permissions per user for menu access, weather, time, dynamic weather and blackout.
 
-**Menu bekijken** is vereist voor de overige gewone rechten. Een opgeslagen gebruikersregel heeft voorrang op de gewone admin-ACE. Alle vinkjes uitzetten trekt gewone toegang in. Meerdere opgeslagen identifiers van dezelfde speler worden beperkend gecombineerd.
+**Menu access** is required for all other regular permissions. A saved user rule takes precedence over the normal admin ACE. Disabling all permissions revokes regular access. Multiple saved identifiers belonging to the same player are combined restrictively.
 
-Hoofdadminrechten worden uitsluitend via ACE toegekend, nooit via het menu. Een hoofdadmin behoudt die rechten ongeacht de gewone gebruikersvinkjes. Er kunnen maximaal 256 gebruikersregels worden opgeslagen.
+Superadmin permissions can only be granted through ACE and never through the menu. A superadmin keeps those permissions regardless of regular user permission settings. Up to 256 user rules can be stored.
 
-## Bediening
+## Controls
 
-Open met `/mstrmenu`. Sluit met Escape, de sluitknop of hetzelfde command.
+Open the menu with `/mstrmenu`. Close it with Escape, the close button, or the same command.
 
-| Onderdeel | Gebruik |
+| Section | Usage |
 | --- | --- |
-| Dashboard | Overzicht van de actuele omgeving |
-| Weer | Weertype kiezen, overgang instellen en dynamisch weer bedienen |
-| Tijd | Tijdstip, bevriezen en tijdsnelheid bedienen |
-| Instellingen | Persoonlijke menukleuren aanpassen |
-| Beheer | Gedeelde instellingen en gebruikersrechten; alleen hoofdadmin |
-| Logs | Actiegeschiedenis; alleen hoofdadmin |
+| Dashboard | Overview of the current environment |
+| Weather | Select weather type, transition mode and control dynamic weather |
+| Time | Control time, freeze state and time scale |
+| Settings | Customize personal menu colors |
+| Management | Shared settings and user permissions; superadmin only |
+| Logs | Action history; superadmin only |
 
-Het open menu ontvangt ongeveer elke twee seconden actuele servergegevens. De weergegeven klok is een momentopname; de spelklok loopt lokaal door op basis van de serverinstellingen.
+While the menu is open, it receives current server data approximately every two seconds. The displayed clock is a snapshot; the in-game clock continues locally based on server settings.
 
-Tijdens een geleidelijke weerovergang wordt een tweede geleidelijke wijziging geweigerd. Een directe wijziging kan de lopende overgang onderbreken, wanneer direct wijzigen is toegestaan.
+During a smooth weather transition, a second smooth transition is rejected. An instant change can interrupt the current transition when instant changes are allowed.
 
-Dynamisch weer kiest de volgende stap uit `Config.Weather.Transitions`. De getallen zijn relatieve kansen. Sneeuw en Halloween worden in de standaardconfiguratie niet automatisch vanuit normaal weer gekozen. Schakel dynamisch weer uit als je een handmatig gekozen weertype wilt behouden.
+Dynamic weather selects its next step from `Config.Weather.Transitions`. The numbers are relative weights. Snow and Halloween are not automatically selected from normal weather in the default configuration. Disable dynamic weather if you want to keep a manually selected weather type active.
 
-Ondersteunde types: `EXTRASUNNY`, `CLEAR`, `CLOUDS`, `SMOG`, `FOGGY`, `OVERCAST`, `RAIN`, `THUNDER`, `CLEARING`, `NEUTRAL`, `SNOW`, `SNOWLIGHT`, `BLIZZARD`, `XMAS` en `HALLOWEEN`.
+Supported types: `EXTRASUNNY`, `CLEAR`, `CLOUDS`, `SMOG`, `FOGGY`, `OVERCAST`, `RAIN`, `THUNDER`, `CLEARING`, `NEUTRAL`, `SNOW`, `SNOWLIGHT`, `BLIZZARD`, `XMAS` and `HALLOWEEN`.
 
-## Configuratie
+## Configuration
 
-Pas de startinstellingen aan in [config.lua](config.lua) en herstart de resource.
+Change startup settings in [config.lua](config.lua) and restart the resource.
 
-| Configuratie | Standaard / betekenis |
+| Configuration | Default / meaning |
 | --- | --- |
-| `General.Locale` | `nl`; ondersteunt `nl` en `en` |
+| `General.Locale` | `nl`; supports `nl` and `en` |
 | `General.MenuCommand` | `mstrmenu` |
 | `Weather.Default` | `CLEAR` |
-| `Weather.TransitionDuration` | 30 seconden |
-| `Weather.AllowInstantChange` | Direct wijzigen toegestaan |
-| `Weather.EnableSnowTrails` | Sneeuwsporen ingeschakeld |
-| `DynamicWeather.Enabled` | Ingeschakeld |
-| `DynamicWeather.IntervalMinutes` | 15 minuten |
+| `Weather.TransitionDuration` | 30 seconds |
+| `Weather.AllowInstantChange` | Instant changes allowed |
+| `Weather.EnableSnowTrails` | Snow trails enabled |
+| `DynamicWeather.Enabled` | Enabled |
+| `DynamicWeather.IntervalMinutes` | 15 minutes |
 | `Time.DefaultHour / DefaultMinute` | 12:00 |
-| `Time.CycleSpeed` | 2; twee spelseconden per echte seconde |
-| `Time.Frozen` | Uitgeschakeld |
-| `Blackout.Default` | Uitgeschakeld |
-| `Blackout.AffectVehicles` | Uitgeschakeld |
-| `Persistence.Enabled` | Ingeschakeld |
-| `Logging.MaxEntries` | 200; instelbaar van 10 tot 1000 |
-| `Debug` | Uitgeschakeld |
+| `Time.CycleSpeed` | 2; two in-game seconds per real second |
+| `Time.Frozen` | Disabled |
+| `Blackout.Default` | Disabled |
+| `Blackout.AffectVehicles` | Disabled |
+| `Persistence.Enabled` | Enabled |
+| `Logging.MaxEntries` | 200; configurable from 10 to 1000 |
+| `Debug` | Disabled |
 
-**Opgeslagen gegevens hebben voorrang op startdefaults.** De hoofdadmin kan overgangsduur, direct wijzigen, dynamisch interval, sneeuwsporen, invloed op voertuigverlichting, omgevingsopslag en servertaal via **Beheer** opslaan. Deze instellingen staan in `data/admin.json`. De opgeslagen omgeving staat afzonderlijk in `data/state.json`.
+**Saved data takes precedence over startup defaults.** The superadmin can save transition duration, instant-change permission, dynamic weather interval, snow trails, vehicle-light impact, environment persistence and server language through **Management**. These settings are stored in `data/admin.json`. The saved environment state is stored separately in `data/state.json`.
 
-Een gewijzigde overgangsduur geldt vanaf de volgende overgang. Een gewijzigd dynamisch interval begint een nieuwe aftelling. Omgevingsopslag inschakelen bewaart de actuele toestand; uitschakelen verwijdert bestaande bestanden niet.
+A changed transition duration applies from the next transition. A changed dynamic weather interval starts a new countdown. Enabling environment persistence saves the current state; disabling it does not remove existing files.
 
-### Taal en uitstraling
+### Language and appearance
 
-**Beheer → Servertaal** kiest Nederlands of Engels voor iedereen. Open menu's volgen de wijziging bij de volgende update. De taal is geen persoonlijke voorkeur.
+**Management → Server language** selects Dutch or English for everyone. Open menus follow the change on the next update. The language is not a personal preference.
 
-Onder **Instellingen → Jouw uitstraling** kiest iedere beheerder een thema of eigen kleuren. Deze voorkeur wordt lokaal in de NUI-browser opgeslagen. Cache wissen of een andere computer gebruiken kan de voorkeur resetten.
+Under **Settings → Your appearance**, each administrator can choose a theme or custom colors. This preference is stored locally in the NUI browser. Clearing cache or using another computer can reset the preference.
 
-Configureer je branding in `config.lua`:
+Configure your branding in `config.lua`:
 
 ```lua
 Config.Branding = {
-    Name = 'Mijn server',
-    Logo = 'images/mijnlogo.png',
+    Name = 'My server',
+    Logo = 'images/mylogo.png',
     ShowName = true
 }
 ```
 
-Plaats je PNG- of WEBP-bestand in `images/`. Gebruik een eenvoudige bestandsnaam met letters, cijfers, streepjes of underscores en een lowercase extensie. Het standaardlogo is `images/default.svg`. Een ontbrekend of ongeldig logo valt terug op het standaardlogo. Met `ShowName = false` verberg je de naam.
+Place your PNG or WEBP file in `images/`. Use a simple filename containing letters, numbers, hyphens or underscores, with a lowercase extension. The default logo is `images/default.svg`. A missing or invalid logo falls back to the default logo. Set `ShowName = false` to hide the name.
 
-### Optionele commands
+### Optional commands
 
-Alleen het menucommand staat standaard aan. Voor optionele commands vervang je `false` in `Config.General` door de bijbehorende naam:
+Only the menu command is enabled by default. To enable optional commands, replace `false` in `Config.General` with the corresponding command name:
 
-| Configveld | Naam | Voorbeelden |
+| Config field | Name | Examples |
 | --- | --- | --- |
 | `WeatherCommand` | `mstrweather` | `/mstrweather RAIN smooth`, `/mstrweather CLEAR instant`, `/mstrweather dynamic false` |
 | `TimeCommand` | `mstrtime` | `/mstrtime 18:30`, `/mstrtime freeze true`, `/mstrtime scale 2` |
 | `BlackoutCommand` | `mstrblackout` | `/mstrblackout true` |
-| `DebugCommand` | `mstrdebug` | Alleen actuele status lezen |
+| `DebugCommand` | `mstrdebug` | Read-only current status |
 
-Gebruik expliciet `false` om een optioneel command uit te schakelen; een ontbrekend veld kan door configuratievalidatie worden aangevuld. Deze commands werken ingame en controleren dezelfde rechten als het menu. Zichtbare commandfeedback gebruikt `chat:addMessage` en vereist een compatibele chatresource.
+Use explicit `false` to disable an optional command; a missing field may be filled by configuration validation. These commands work in-game and use the same permission checks as the menu. Visible command feedback uses `chat:addMessage` and requires a compatible chat resource.
 
-Commands en menuacties delen een limiet van één verzoek per speler per 500 ms. Te snelle commands worden genegeerd. Het statuscommand heeft een afzonderlijke limiet en staat los van `Config.Debug`.
+Commands and menu actions share a limit of one request per player every 500 ms. Commands sent too quickly are ignored. The status command has a separate limit and is independent of `Config.Debug`.
 
-## Opslag, backups en updates
+## Storage, backups and updates
 
-| Bestand | Inhoud |
+| File | Contents |
 | --- | --- |
-| `data/state.json` | Weer, tijd, dynamisch weer, blackout, bevriezen en tijdsnelheid |
-| `data/state.json.bak` | Vorige geldige omgevingsopslag |
-| `data/admin.json` | Gedeelde beheerinstellingen en gebruikersrechten |
-| `data/admin.json.bak` | Vorige beheeropslag |
+| `data/state.json` | Weather, time, dynamic weather, blackout, freeze state and time scale |
+| `data/state.json.bak` | Previous valid environment state |
+| `data/admin.json` | Shared admin settings and user permissions |
+| `data/admin.json.bak` | Previous admin state |
 
-Deze bestanden worden tijdens gebruik aangemaakt en horen niet in Git. Bewaar ze bij updates:
+These files are created during runtime and should not be committed to Git. Preserve them when updating:
 
-1. Stop de resource normaal.
-2. Maak buiten de resource een backup van `config.lua`, eigen logo's en alle bovenstaande JSON- en backupbestanden.
-3. Werk de resourcebestanden bij en neem je eigen configuratiewaarden over.
-4. Behoud of herstel de runtimebestanden in `data/`.
-5. Start de resource opnieuw.
+1. Stop the resource normally.
+2. Make a backup outside the resource of `config.lua`, custom logos and all JSON and backup files listed above.
+3. Update the resource files and reapply your custom configuration values.
+4. Keep or restore the runtime files in `data/`.
+5. Start the resource again.
 
-Writes worden gebundeld en teruggelezen ter controle. Bij normale stop wordt de actuele omgeving opgeslagen. Een crash kan wijzigingen sinds de laatste geslaagde opslag verliezen. Seconden, overgangsvoortgang en offline verstreken tijd worden niet bewaard. Tijdens een overgang wordt het doelweer opgeslagen en na herstart direct toegepast.
+Writes are batched and read back for verification. On a normal stop, the current environment is saved. A crash may lose changes made since the last successful save. Seconds, transition progress and elapsed offline time are not stored. During a transition, the target weather is saved and applied immediately after restart.
 
-Bij ongeldige omgevingsopslag probeert de resource de backup en daarna de defaults. **Voor beheerrechten is er bewust geen automatische backuprestore**: een oude backup kan ingetrokken rechten teruggeven. Beschadigde beheeropslag blokkeert gewone toegang en beheerschrijfacties. De hoofdadmin kan nog kijken. Stop de resource, controleer primary en backup en herstel bewust een geldige versie.
+If the environment state is invalid, the resource tries the backup and then the defaults. **Admin permissions intentionally do not use automatic backup restore** because an old backup could restore revoked permissions. Corrupted admin storage blocks regular access and admin writes. The superadmin can still inspect the system. Stop the resource, inspect the primary and backup files, and deliberately restore a valid version.
 
-Verwijder `admin.json` en de backup niet zomaar: zonder beide bestanden gelden opnieuw defaults en gewone ACE-rechten. Zie ook [data/README.md](data/README.md).
+Do not simply delete `admin.json` and its backup: if both files are missing, defaults and regular ACE permissions apply again. See [data/README.md](data/README.md).
 
 ## Logging
 
-De hoofdadmin ziet ADMIN- en SYSTEM-acties met tijdstip, bron, speler/identifier waar van toepassing en oude/nieuwe waarden. Logs staan uitsluitend in het geheugen, zijn begrensd en verdwijnen bij een resource- of serverherstart. Er is geen database- of bestandsarchief voor logs.
+The superadmin can view ADMIN and SYSTEM actions with timestamp, source, player/identifier where applicable, and old/new values. Logs are stored in memory only, are bounded, and disappear after a resource or server restart. There is no database or file archive for logs.
 
-## Problemen oplossen
+## Troubleshooting
 
-| Probleem | Controle |
+| Problem | Check |
 | --- | --- |
-| Menu opent niet | Resource gestart, commandnaam correct en effectieve ACE of gebruikersrechten aanwezig |
-| Beheer of Logs ontbreekt | Eigen account heeft de hoofdadmin-ACE nodig |
-| Configwijziging lijkt genegeerd | Opgeslagen beheerinstellingen of omgevingsstate hebben voorrang |
-| Weer of tijd springt terug | Controleer of een andere resource of dynamisch weer de omgeving wijzigt |
-| Wijziging wordt geweigerd | Controleer rechten, actieve overgang, invoer en de verzoeklimiet |
-| Opslagmelding of vergrendeld beheer | Controleer serverconsole, schrijfrechten en JSON-bestanden; volg de hersteluitleg hierboven |
-| Logo verschijnt niet | Controleer bestandspad, naam, extensie en of het bestand is meegeleverd |
+| Menu does not open | Resource is started, command name is correct, and effective ACE or user permissions are present |
+| Management or Logs is missing | Your account needs the superadmin ACE |
+| Config change appears to be ignored | Saved admin settings or environment state take precedence |
+| Weather or time jumps back | Check whether another resource or dynamic weather is changing the environment |
+| Change is rejected | Check permissions, active transition, input and request rate limit |
+| Storage warning or locked management | Check server console, write permissions and JSON files; follow the recovery instructions above |
+| Logo does not appear | Check file path, filename, extension and whether the file is included |
 
-Gebruik voor ondersteuning de F8- en servermeldingen, resourceversie en concrete stappen om het probleem te herhalen. Deel geen spelersidentifiers of beheerbestanden openbaar.
+For support, include F8 and server messages, resource version and clear reproduction steps. Do not share player identifiers or admin files publicly.
 
-## Versiestatus
+## Version status
 
-Versie **1.0.0** is op verzoek van de eigenaar als eindversie afgerond na goedgekeurde ingame controles tot en met Fase 8. Eerder is synchronisatie met een tweede speler bevestigd.
+Version **1.0.0** was finalized at the owner's request after approved in-game checks through Phase 8. Synchronization with a second player had previously been confirmed.
 
-**Release-TODO:** de volledige multiplayer-eindcontrole op deze eindversie is uitgesteld: synchronisatie met twee echte clients, late join tijdens een overgang en gelijktijdige bediening door twee admins. Deze controles zijn niet als geslaagd aangemerkt. Er wordt geen vaste CPU- of resmonwaarde gegarandeerd.
+**Release TODO:** the full multiplayer final verification for this exact release has been postponed: synchronization with two real clients, late join during a transition and simultaneous control by two admins. These checks have not been marked as passed. No fixed CPU or resmon value is guaranteed.
 
-De ontwikkeltests en fase-documentatie zijn uit de productversie verwijderd; eerdere versies blijven beschikbaar in de Git-geschiedenis. Deze versie biedt geen publieke developer-exports, zones, afzonderlijk weer per routing bucket of real-world weather.
+Development tests and phase documentation have been removed from the product version; earlier versions remain available in Git history. This version does not provide public developer exports, zones, per-routing-bucket weather or real-world weather.
 
-## Auteur
+## Author
 
 **Martstok** · MSTR_Weather
 
-Copyright © 2026 Martstok. Alle rechten voorbehouden.
+Copyright © 2026 Martstok. All rights reserved.
