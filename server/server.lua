@@ -31,6 +31,7 @@ local restoredState = MSTR.Persistence.Initialize()
 MSTR.State.Initialize(restoredState)
 MSTR.WeatherEngine.Initialize()
 MSTR.TimeEngine.Initialize()
+MSTR.Persistence.SetReady()
 
 local syncRequestTimes = {}
 
@@ -39,7 +40,7 @@ RegisterNetEvent('mstr_weather:server:requestSync', function()
     local now = GetGameTimer()
     local lastRequest = syncRequestTimes[playerSource]
 
-    if lastRequest and now - lastRequest < 1000 then
+    if lastRequest and MSTR.Utils.ElapsedMs(now, lastRequest) < 1000 then
         return
     end
 
@@ -131,8 +132,12 @@ RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source,
         return
     end
 
-    local success = MSTR.WeatherEngine.SetWeather(weatherType, mode == 'instant')
+    local success, reason = MSTR.WeatherEngine.SetWeather(weatherType, mode == 'instant')
     if not success then
+        if reason == 'transitioning' then
+            SendMessage(source, 'A weather transition is active. Wait for completion or use instant.')
+            return
+        end
         SendMessage(source, 'Failed to change weather to ' .. weatherType)
         return
     end

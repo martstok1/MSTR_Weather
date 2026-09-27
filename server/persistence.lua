@@ -7,7 +7,11 @@ MSTR.Persistence = MSTR.Persistence or {}
 local Persistence = MSTR.Persistence
 
 local initialized = false
+local ready = false
 local saveGeneration = 0
+local workerRunning = false
+local lastMutationAt = 0
+local lastGoodRaw = nil
 local resourceName = GetCurrentResourceName()
 
 local function GetFilePath()
@@ -39,6 +43,11 @@ local function DecodeJson(raw)
 end
 
 local function ValidateLoadedState(data)
+    -- No version is accepted for early development files; reject future formats.
+    if data.version ~= nil and data.version ~= 1 then
+        MSTR.Utils.Warn('Unsupported persistence version; trying backup/defaults')
+        return nil
+    end
     local restored = {}
     local validFields = 0
 
@@ -103,27 +112,22 @@ function Persistence.LoadState()
     end
 
     local path = GetFilePath()
-    local raw = LoadResourceFile(resourceName, path)
-
-    if raw == nil then
-        MSTR.Utils.Debug(('No persistence file found at %s; using config defaults'):format(path))
-        return nil
+    for _, candidate in ipairs({ path, path .. '.bak' }) do
+        local raw = LoadResourceFile(resourceName, candidate)
+        if raw ~= nil then
+            local decoded = DecodeJson(raw)
+            local restored = decoded and ValidateLoadedState(decoded) or nil
+            if restored then
+                lastGoodRaw = raw
+                if candidate ~= path then
+                    MSTR.Utils.Warn('Recovered persistence from ' .. candidate)
+                end
+                return restored
+            end
+            MSTR.Utils.Warn('Invalid/empty persistence file ' .. candidate .. '; trying backup/defaults')
+        end
     end
-
-    local decoded = DecodeJson(raw)
-    if not decoded then
-        MSTR.Utils.Warn(('Persistence file %s is invalid JSON; using valid config defaults'):format(path))
-        return nil
-    end
-
-    local restored = ValidateLoadedState(decoded)
-    if not restored then
-        MSTR.Utils.Debug(('Persistence file %s contains no usable state; using config defaults'):format(path))
-        return nil
-    end
-
-    MSTR.Utils.Debug(('Loaded persisted state from %s'):format(path))
-    return restored
+    return nil
 end
 
 local function BuildSaveData()
@@ -145,7 +149,9 @@ local function BuildSaveData()
 
     return {
         version = 1,
-        weather = snapshot.weather,
+        -- Accepted transitions restore at their destination after a restart.
+        -- Intermediate blend/timer state is intentionally not persisted.
+        weather = snapshot.weatherTransition.active and snapshot.weatherTransition.target or snapshot.weather,
         dynamicWeather = snapshot.dynamicWeather,
         blackout = snapshot.blackout,
         timeFrozen = snapshot.timeFrozen,
@@ -162,7 +168,7 @@ function Persistence.SaveState(reason)
         return false
     end
 
-    if not MSTR.State then
+    if not ready or not MSTR.State then
         return false
     end
 
@@ -175,12 +181,21 @@ function Persistence.SaveState(reason)
     end
 
     local path = GetFilePath()
+    -- Keep the previous known-good state before replacing the primary file.
+    -- On the first save, seed the backup with the new valid state instead.
+    local backup = lastGoodRaw or encoded
+    local backupSaved = SaveResourceFile(resourceName, path .. '.bak', backup, #backup)
+    if backupSaved ~= true and backupSaved ~= 1 then
+        MSTR.Utils.Warn('Failed to write persistence backup; keeping primary untouched')
+        return false
+    end
     local saved = SaveResourceFile(resourceName, path, encoded, #encoded)
 
     if saved ~= true and saved ~= 1 then
         MSTR.Utils.Warn(('Failed to save state to %s'):format(path))
         return false
     end
+    lastGoodRaw = encoded
 
     MSTR.Utils.Debug(('Persisted state to %s%s'):format(
         path,
@@ -191,12 +206,14 @@ function Persistence.SaveState(reason)
 end
 
 function Persistence.MarkDirty(reason)
-    if not initialized or not Config.Persistence or Config.Persistence.Enabled ~= true then
+    if not ready or not initialized or not Config.Persistence or Config.Persistence.Enabled ~= true then
         return
     end
 
     saveGeneration = saveGeneration + 1
-    local generation = saveGeneration
+    lastMutationAt = GetGameTimer()
+    if workerRunning then return end
+    workerRunning = true
     local debounceMs = tonumber(Config.Persistence.DebounceMs) or 1500
 
     if debounceMs < 0 then
@@ -206,17 +223,37 @@ function Persistence.MarkDirty(reason)
     end
 
     CreateThread(function()
-        Wait(math.floor(debounceMs))
-
-        if generation ~= saveGeneration then
-            return
+        local attempts = 0
+        while ready do
+            local remaining = debounceMs - MSTR.Utils.ElapsedMs(GetGameTimer(), lastMutationAt)
+            if remaining > 0 then
+                Wait(math.floor(remaining))
+            else
+                local generation = saveGeneration
+                if Persistence.SaveState(reason or 'state changed') then
+                    if generation == saveGeneration then break end
+                    attempts = 0
+                else
+                    attempts = attempts + 1
+                    if attempts >= 3 then
+                        MSTR.Utils.Warn('Persistence failed after 3 attempts; next mutation/clean stop will retry')
+                        break
+                    end
+                    Wait(5000)
+                end
+            end
         end
-
-        Persistence.SaveState(reason or 'state changed')
+        workerRunning = false
     end)
 end
 
+function Persistence.SetReady()
+    ready = initialized
+end
+
 function Persistence.Initialize()
+    ready = false
+    lastGoodRaw = nil
     if not Config.Persistence or Config.Persistence.Enabled ~= true then
         MSTR.Utils.Debug('Persistence disabled by config')
         initialized = false
@@ -230,10 +267,11 @@ function Persistence.Initialize()
 end
 
 AddEventHandler('onResourceStop', function(stoppedResource)
-    if stoppedResource ~= resourceName or not initialized then
+    if stoppedResource ~= resourceName or not ready then
         return
     end
 
     -- Flush the latest resolved state once on a clean resource stop.
     Persistence.SaveState('resource stop')
+    ready = false
 end)

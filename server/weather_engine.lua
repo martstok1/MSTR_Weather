@@ -9,7 +9,8 @@ local WeatherEngine = MSTR.WeatherEngine
 local schedulerStarted = false
 local transitionSerial = 0
 local activeTransition = nil
-local nextDynamicDecisionAt = nil
+local dynamicTimer = nil
+local schedulerGeneration = 0
 
 local function GetWeightedChoice(weights)
     if type(weights) ~= 'table' then
@@ -19,7 +20,7 @@ local function GetWeightedChoice(weights)
     local totalWeight = 0.0
 
     for weatherType, weight in pairs(weights) do
-        if MSTR.Utils.IsValidWeatherType(weatherType) and type(weight) == 'number' and weight > 0 then
+        if MSTR.Utils.IsValidWeatherType(weatherType) and MSTR.Utils.IsValidNumber(weight, 0.000001, 1000000) then
             totalWeight = totalWeight + weight
         end
     end
@@ -32,11 +33,11 @@ local function GetWeightedChoice(weights)
     local cumulative = 0.0
 
     for weatherType, weight in pairs(weights) do
-        if MSTR.Utils.IsValidWeatherType(weatherType) and type(weight) == 'number' and weight > 0 then
+        if MSTR.Utils.IsValidWeatherType(weatherType) and MSTR.Utils.IsValidNumber(weight, 0.000001, 1000000) then
             cumulative = cumulative + weight
 
             if roll <= cumulative then
-                return weatherType
+                return MSTR.Utils.NormalizeWeatherType(weatherType)
             end
         end
     end
@@ -80,11 +81,11 @@ end
 
 local function ResetDynamicTimer(reason)
     if not MSTR.State.GetDynamicWeather() then
-        nextDynamicDecisionAt = nil
+        dynamicTimer = nil
         return
     end
 
-    nextDynamicDecisionAt = GetGameTimer() + GetDynamicIntervalMs()
+    dynamicTimer = { started = GetGameTimer(), interval = GetDynamicIntervalMs() }
 
     if reason then
         MSTR.Utils.Debug(('Dynamic weather timer reset (%s)'):format(reason))
@@ -95,12 +96,13 @@ local function BroadcastWeather(currentWeather, targetWeather, duration)
     TriggerClientEvent('mstr_weather:client:weatherSync', -1, {
         currentWeather = currentWeather,
         targetWeather = targetWeather,
-        transitionDuration = duration
+        transitionDuration = duration,
+        transitionElapsed = 0
     })
 end
 
 local function CompleteTransition(serial, targetWeather)
-    if serial ~= transitionSerial then
+    if serial ~= transitionSerial or not activeTransition then
         return
     end
 
@@ -133,7 +135,7 @@ function WeatherEngine.Initialize()
     MSTR.State.SetWeatherTransition(false, nil, 0)
     activeTransition = nil
     transitionSerial = 0
-    nextDynamicDecisionAt = nil
+    dynamicTimer = nil
 
     MSTR.Utils.Debug('Weather engine initialized')
 end
@@ -142,9 +144,14 @@ function WeatherEngine.IsTransitioning()
     return activeTransition ~= nil
 end
 
-function WeatherEngine.GetRandomWeatherType()
-    return GetWeightedChoice(Config.Weather.Weights) or MSTR.State.GetWeather()
-end
+-- A missing/broken graph must not suddenly turn fog into a thunderstorm.
+local SAFE_NEXT = {
+    EXTRASUNNY = 'CLEAR', CLEAR = 'CLOUDS', CLOUDS = 'CLEAR',
+    SMOG = 'CLOUDS', FOGGY = 'CLOUDS', OVERCAST = 'CLOUDS',
+    RAIN = 'CLEARING', THUNDER = 'RAIN', CLEARING = 'CLOUDS',
+    NEUTRAL = 'CLEAR', SNOW = 'SNOWLIGHT', BLIZZARD = 'SNOW',
+    SNOWLIGHT = 'CLEARING', XMAS = 'SNOWLIGHT', HALLOWEEN = 'FOGGY'
+}
 
 function WeatherEngine.GetNextWeatherType(currentWeather)
     local normalized = MSTR.Utils.NormalizeWeatherType(currentWeather)
@@ -161,10 +168,10 @@ function WeatherEngine.GetNextWeatherType(currentWeather)
         return selected
     end
 
-    MSTR.Utils.Debug(('No usable transition graph entry for %s; using fallback weights')
+    MSTR.Utils.Warn(('No usable transition graph entry for %s; using safe fallback')
         :format(normalized))
 
-    return WeatherEngine.GetRandomWeatherType()
+    return SAFE_NEXT[normalized] or 'CLEAR'
 end
 
 function WeatherEngine.SetWeather(weatherType, instant)
@@ -177,6 +184,12 @@ function WeatherEngine.SetWeather(weatherType, instant)
 
     local currentWeather = MSTR.State.GetWeather()
     local useInstant = instant == true and Config.Weather.AllowInstantChange == true
+
+    -- A third weather cannot be represented by the current two-weather blend.
+    -- Keep the active blend intact; admins can explicitly interrupt with instant.
+    if activeTransition and not useInstant and GetTransitionDuration() > 0 then
+        return false, 'transitioning'
+    end
 
     transitionSerial = transitionSerial + 1
     local serial = transitionSerial
@@ -223,6 +236,9 @@ function WeatherEngine.SetWeather(weatherType, instant)
 
     BroadcastWeather(currentWeather, targetWeather, duration)
     ResetDynamicTimer('weather transition started')
+    if MSTR.Persistence then
+        MSTR.Persistence.MarkDirty('weather transition accepted')
+    end
 
     MSTR.Utils.Debug(('Weather transition started: %s -> %s (%ss)')
         :format(currentWeather, targetWeather, tostring(duration)))
@@ -246,8 +262,11 @@ function WeatherEngine.SetDynamicWeather(enabled)
 
     if enabled then
         ResetDynamicTimer('dynamic weather enabled')
+        WeatherEngine.StartScheduler()
     else
-        nextDynamicDecisionAt = nil
+        dynamicTimer = nil
+        schedulerGeneration = schedulerGeneration + 1
+        schedulerStarted = false
         MSTR.Utils.Debug('Dynamic weather disabled; current weather left unchanged')
     end
 
@@ -263,7 +282,7 @@ function WeatherEngine.GetTransitionRemainingSeconds()
         return 0
     end
 
-    local elapsedMs = GetGameTimer() - activeTransition.startTimer
+    local elapsedMs = MSTR.Utils.ElapsedMs(GetGameTimer(), activeTransition.startTimer)
     local remainingMs = activeTransition.durationMs - elapsedMs
 
     if remainingMs <= 0 then
@@ -274,11 +293,11 @@ function WeatherEngine.GetTransitionRemainingSeconds()
 end
 
 function WeatherEngine.GetNextDynamicChangeSeconds()
-    if not MSTR.State.GetDynamicWeather() or not nextDynamicDecisionAt then
+    if not MSTR.State.GetDynamicWeather() or not dynamicTimer then
         return nil
     end
 
-    local remainingMs = nextDynamicDecisionAt - GetGameTimer()
+    local remainingMs = dynamicTimer.interval - MSTR.Utils.ElapsedMs(GetGameTimer(), dynamicTimer.started)
 
     if remainingMs <= 0 then
         return 0
@@ -303,7 +322,8 @@ function WeatherEngine.SyncPlayer(source)
             TriggerClientEvent('mstr_weather:client:weatherSync', playerSource, {
                 currentWeather = MSTR.State.GetWeather(),
                 targetWeather = activeTransition.target,
-                transitionDuration = remaining
+                transitionDuration = activeTransition.durationMs / 1000.0,
+                transitionElapsed = (activeTransition.durationMs / 1000.0) - remaining
             })
             return
         end
@@ -314,7 +334,8 @@ function WeatherEngine.SyncPlayer(source)
     TriggerClientEvent('mstr_weather:client:weatherSync', playerSource, {
         currentWeather = currentWeather,
         targetWeather = currentWeather,
-        transitionDuration = 0
+        transitionDuration = 0,
+        transitionElapsed = 0
     })
 end
 
@@ -355,33 +376,34 @@ function WeatherEngine.RunDynamicCycle()
 end
 
 function WeatherEngine.StartScheduler()
-    if schedulerStarted then
+    if schedulerStarted or not MSTR.State.GetDynamicWeather() then
         return
     end
 
     schedulerStarted = true
+    schedulerGeneration = schedulerGeneration + 1
+    local generation = schedulerGeneration
 
     if MSTR.State.GetDynamicWeather() then
         ResetDynamicTimer('scheduler started')
     end
 
     CreateThread(function()
-        while true do
+        while generation == schedulerGeneration and MSTR.State.GetDynamicWeather() do
             Wait(1000)
+            if generation ~= schedulerGeneration or not MSTR.State.GetDynamicWeather() then
+                return
+            end
 
-            if not MSTR.State.GetDynamicWeather() then
-                nextDynamicDecisionAt = nil
-            else
-                if not nextDynamicDecisionAt then
-                    ResetDynamicTimer('scheduler resumed')
-                elseif GetGameTimer() >= nextDynamicDecisionAt then
-                    if WeatherEngine.IsTransitioning() then
-                        -- Never stack automatic transitions. If a transition is still
-                        -- active when the interval expires, wait a fresh interval.
-                        ResetDynamicTimer('transition still active')
-                    else
-                        WeatherEngine.RunDynamicCycle()
-                    end
+            if not dynamicTimer then
+                ResetDynamicTimer('scheduler resumed')
+            elseif WeatherEngine.GetNextDynamicChangeSeconds() <= 0 then
+                if WeatherEngine.IsTransitioning() then
+                    -- Never stack automatic transitions. If a transition is still
+                    -- active when the interval expires, wait a fresh interval.
+                    ResetDynamicTimer('transition still active')
+                else
+                    WeatherEngine.RunDynamicCycle()
                 end
             end
         end

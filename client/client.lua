@@ -17,7 +17,10 @@ local function RequestInitialSync()
 
     CreateThread(function()
         Wait(500)
-        TriggerServerEvent('mstr_weather:server:requestSync')
+        while not MSTR.ClientWeather.IsSynced() or not MSTR.ClientTime.IsSynced() do
+            TriggerServerEvent('mstr_weather:server:requestSync')
+            Wait(2000)
+        end
     end)
 end
 
