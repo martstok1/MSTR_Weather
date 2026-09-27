@@ -157,7 +157,7 @@ function Utils.ValidateConfig()
     boolean(Config, 'Debug', false)
     local general = group('General')
     local commands = { DebugCommand = 'mstrdebug', WeatherCommand = 'mstrweather',
-        TimeCommand = 'mstrtime', BlackoutCommand = 'mstrblackout' }
+        TimeCommand = 'mstrtime', BlackoutCommand = 'mstrblackout', MenuCommand = 'mstrmenu' }
     local seen, invalidCommands = {}, false
     for key in pairs(commands) do
         local value = general[key]

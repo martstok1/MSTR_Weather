@@ -60,6 +60,14 @@ local function runtime(options)
     end
     e.AddStateBagChangeHandler = function(key, _, f) r.handlers[key] = { f } end
     e.RegisterCommand = function(name, f) r.commands[name] = f end
+    r.callbacks = {}
+    e.RegisterNUICallback = function(name, f) r.callbacks[name] = f end
+    e.SetNuiFocus = function(keyboard, mouse) r.focus = keyboard or mouse end
+    e.SendNUIMessage = function(message) r.message = message end
+    e.TriggerServerEvent = function(name, id)
+        r.requests = (r.requests or 0) + 1
+        r.lastRequest = { name = name, id = id }
+    end
     function r.emit(name, ...)
         for _, f in ipairs(r.handlers[name] or {}) do f(...) end
     end
@@ -348,3 +356,6 @@ check('disabled persistence never writes', function()
 end)
 
 print(('All %d mocked regression checks passed. FiveM ingame validation is still required.'):format(passed))
+
+-- Also reused by the Phase 6 tests; no runtime resource dependency.
+return runtime

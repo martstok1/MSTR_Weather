@@ -10,8 +10,16 @@ Current development status:
 - Phase 4 — Dynamic Weather
 - Phase 5 — Blackout + Persistence
 
-Status: Fase 1-5 verbeteringen geïmplementeerd; wacht op ingame validatie.
-Fase 6 (NUI) is nog niet gebouwd en start pas na akkoord op de tests.
+Status: Fase 6A — read-only NUI geïmplementeerd; wacht op ingame validatie.
+Start met `/mstrmenu` (of `mstrmenu` in F8). Vereist de bestaande admin-ACE.
+Dashboard, Weather, Time en Settings tonen servergegevens om de twee seconden,
+uitsluitend terwijl het menu openstaat. De klok is een servermomentopname.
+Sluit met Escape, de sluitknop of nogmaals het command.
+
+Volg [Instructions/FASE_6A_TESTPLAN.md](Instructions/FASE_6A_TESTPLAN.md).
+Volgens de werkinstructie testen we eerst read-only voordat de controls worden
+gebouwd. Logs en configureerbare branding horen bij Fase 7; geen lege Logs-tab.
+Eerdere ingame testresultaten zijn niet automatisch als geslaagd aangemerkt.
 
 ## Testen vóór Fase 6
 
@@ -45,13 +53,20 @@ Vanuit de repository-root, met Lua 5.4:
 
 ```sh
 lua5.4 tests/phase1_5.lua
+lua5.4 tests/phase6.lua
 ```
 
-De 16 tests gebruiken nagebootste Cfx-functies, timers, JSON en schijfopslag.
+De tweede opdracht draait de 16 core-tests plus 4 NUI-security/lifecycle-tests.
+De tests gebruiken nagebootste Cfx-functies, timers, JSON en schijfopslag.
 Ze controleren de logica, niet echte GTA-rendering, netwerkvertraging of writes.
 De testbestanden worden niet door `fxmanifest.lua` geladen.
 
 ## Native-referenties
+
+De NUI gebruikt lokale manifest-assets, `SendNUIMessage`, `SetNuiFocus` en
+callbacks met altijd een antwoord, volgens de officiële Cfx-documentatie:
+[Fullscreen NUI](https://docs.fivem.net/docs/scripting-manual/nui-development/full-screen-nui/)
+en [NUI callbacks](https://docs.fivem.net/docs/scripting-manual/nui-development/nui-callbacks/).
 
 De client gebruikt de gedocumenteerde mengfactor van
 [SetWeatherTypeTransition](https://github.com/citizenfx/natives/blob/master/MISC/SetWeatherTypeTransition.md),

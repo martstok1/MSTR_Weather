@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Environment console</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main id="app" hidden aria-label="Environment console">
+    <aside>
+      <div class="mark" aria-hidden="true">◈</div>
+      <div class="eyebrow">ADMIN CONSOLE</div>
+      <h1>Environment<span>Weather &amp; time</span></h1>
+      <nav aria-label="Pagina’s">
+        <button data-page="dashboard" aria-current="page">Dashboard <span>01</span></button>
+        <button data-page="weather">Weather <span>02</span></button>
+        <button data-page="time">Time <span>03</span></button>
+        <button data-page="settings">Settings <span>04</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span class="dot"></span> Server-authoritative<br><small>Fase 6A · Alleen lezen</small></div>
+    </aside>
+    <div class="workspace">
+      <header><div><div class="eyebrow">LIVE ENVIRONMENT</div><h2 id="page-title">Dashboard</h2></div><button id="close" aria-label="Menu sluiten">Sluiten <kbd>Esc</kbd></button></header>
+      <div class="notice">Read-only testversie. Wijzigingen via bestaande admincommands verschijnen hier automatisch.</div>
+      <section id="dashboard" class="page">
+        <div class="hero"><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
+        <div class="cards">
+          <article><h3>Servertijd</h3><strong data-value="clock">—</strong><p data-value="clockMode">—</p></article>
+          <article><h3>Dynamic weather</h3><strong data-value="dynamic">—</strong><p data-value="next">—</p></article>
+          <article><h3>Blackout</h3><strong data-value="blackout">—</strong><p>Globale verlichting</p></article>
+        </div>
+      </section>
+      <section id="weather" class="page" hidden>
+        <h3 class="section-title">Weer &amp; overgangen</h3>
+        <dl><dt>Huidig weer</dt><dd data-value="weather">—</dd><dt>Overgang</dt><dd data-value="transition">—</dd><dt>Automatische cyclus</dt><dd data-value="dynamic">—</dd><dt>Volgende beslissing</dt><dd data-value="next">—</dd><dt>Blackout</dt><dd data-value="blackout">—</dd></dl>
+      </section>
+      <section id="time" class="page" hidden>
+        <div class="hero"><div class="eyebrow">ACTUELE SERVERKLOK</div><div class="weather-name" data-value="clock">—</div><p>Momentopname, elke twee seconden bijgewerkt.</p></div>
+        <dl><dt>Bevroren</dt><dd data-value="frozen">—</dd><dt>Tijdsnelheid</dt><dd data-value="scale">—</dd><dt>Toegestaan bereik</dt><dd data-value="scaleRange">—</dd></dl>
+      </section>
+      <section id="settings" class="page" hidden>
+        <h3 class="section-title">Actieve serverconfiguratie</h3>
+        <p class="muted">Deze waarden zijn alleen leesbaar. Aanpassen gebeurt in config.lua.</p>
+        <dl><dt>Overgangsduur</dt><dd data-value="duration">—</dd><dt>Instant weer toegestaan</dt><dd data-value="instant">—</dd><dt>Sneeuwsporen</dt><dd data-value="snow">—</dd><dt>Dynamic interval</dt><dd data-value="interval">—</dd><dt>Blackout beïnvloedt voertuigen</dt><dd data-value="vehicles">—</dd><dt>Persistence ingeschakeld</dt><dd data-value="persistence">—</dd></dl>
+      </section>
+      <footer><span id="connection" role="status">Wachten op server</span><span>Geen lokale statewijzigingen</span></footer>
+    </div>
+  </main>
+</body>
+</html>

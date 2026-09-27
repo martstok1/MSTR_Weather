@@ -11,7 +11,8 @@ Config.General = {
     DebugCommand = 'mstrdebug',
     WeatherCommand = 'mstrweather',
     TimeCommand = 'mstrtime',
-    BlackoutCommand = 'mstrblackout'
+    BlackoutCommand = 'mstrblackout',
+    MenuCommand = 'mstrmenu'
 }
 
 Config.Branding = {
@@ -174,4 +175,3 @@ Config.Persistence = {
     -- Multiple state changes in quick succession are batched into one write.
     DebounceMs = 1500
 }
-
