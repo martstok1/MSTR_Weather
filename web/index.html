@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Environment console</title>
   <link rel="stylesheet" href="style.css">
+  <script src="theme.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -19,13 +20,13 @@
         <button data-page="time">Time <span>03</span></button>
         <button data-page="settings">Settings <span>04</span></button>
       </nav>
-      <div class="sidebar-bottom"><span class="dot"></span> Server-authoritative<br><small>Fase 6A · Alleen lezen</small></div>
+      <div class="sidebar-bottom"><span class="dot"></span> Live synchronisatie<br><small>WEATHER &amp; TIME CONTROL</small></div>
     </aside>
     <div class="workspace">
       <header><div><div class="eyebrow">LIVE ENVIRONMENT</div><h2 id="page-title">Dashboard</h2></div><button id="close" aria-label="Menu sluiten">Sluiten <kbd>Esc</kbd></button></header>
-      <div class="notice">Read-only testversie. Wijzigingen via bestaande admincommands verschijnen hier automatisch.</div>
+      <div class="notice"><span class="notice-label">LIVE OVERZICHT</span> Weer en tijd zijn alleen leesbaar. Je menukleuren pas je aan via Settings.</div>
       <section id="dashboard" class="page">
-        <div class="hero"><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
+        <div class="hero weather-hero"><div class="orb" aria-hidden="true"></div><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
         <div class="cards">
           <article><h3>Servertijd</h3><strong data-value="clock">—</strong><p data-value="clockMode">—</p></article>
           <article><h3>Dynamic weather</h3><strong data-value="dynamic">—</strong><p data-value="next">—</p></article>
@@ -41,11 +42,26 @@
         <dl><dt>Bevroren</dt><dd data-value="frozen">—</dd><dt>Tijdsnelheid</dt><dd data-value="scale">—</dd><dt>Toegestaan bereik</dt><dd data-value="scaleRange">—</dd></dl>
       </section>
       <section id="settings" class="page" hidden>
+        <div class="section-heading"><div><div class="eyebrow">MAAK HET PERSOONLIJK</div><h3 class="section-title">Jouw uitstraling</h3></div><span class="badge">Alleen jouw menu</span></div>
+        <p class="muted">Kies een stijl of stel je eigen kleuren samen. Je voorkeur wordt op dit apparaat bewaard.</p>
+        <div class="presets" role="group" aria-label="Themapresets">
+          <button type="button" data-theme="champagne" aria-pressed="true"><span class="swatch champagne" aria-hidden="true"></span><span>Champagne<small>Warm &amp; verfijnd</small></span></button>
+          <button type="button" data-theme="jade" aria-pressed="false"><span class="swatch jade" aria-hidden="true"></span><span>Jade<small>Rustig &amp; natuurlijk</small></span></button>
+          <button type="button" data-theme="arctic" aria-pressed="false"><span class="swatch arctic" aria-hidden="true"></span><span>Arctic<small>Koel &amp; helder</small></span></button>
+          <button type="button" data-theme="amethyst" aria-pressed="false"><span class="swatch amethyst" aria-hidden="true"></span><span>Amethyst<small>Diep &amp; expressief</small></span></button>
+        </div>
+        <div class="theme-editor">
+          <div class="color-field"><label for="color-accent">Accentkleur</label><div class="color-input"><input type="color" id="color-accent" data-color="accent" value="#d2b782" aria-label="Accentkleur kiezen"><input type="text" data-hex="accent" value="#d2b782" maxlength="7" aria-label="Accentkleur hexcode" spellcheck="false"></div></div>
+          <div class="color-field"><label for="color-background">Achtergrond</label><div class="color-input"><input type="color" id="color-background" data-color="background" value="#141619" aria-label="Achtergrondkleur kiezen"><input type="text" data-hex="background" value="#141619" maxlength="7" aria-label="Achtergrond hexcode" spellcheck="false"></div></div>
+          <div class="color-field"><label for="color-surface">Panelen</label><div class="color-input"><input type="color" id="color-surface" data-color="surface" value="#1e2126" aria-label="Paneelkleur kiezen"><input type="text" data-hex="surface" value="#1e2126" maxlength="7" aria-label="Panelen hexcode" spellcheck="false"></div></div>
+        </div>
+        <div class="theme-actions"><span id="theme-status" role="status" aria-live="polite">Persoonlijk thema</span><button type="button" id="theme-reset" class="quiet-button">Standaard herstellen</button></div>
+        <div class="settings-divider"></div>
         <h3 class="section-title">Actieve serverconfiguratie</h3>
         <p class="muted">Deze waarden zijn alleen leesbaar. Aanpassen gebeurt in config.lua.</p>
         <dl><dt>Overgangsduur</dt><dd data-value="duration">—</dd><dt>Instant weer toegestaan</dt><dd data-value="instant">—</dd><dt>Sneeuwsporen</dt><dd data-value="snow">—</dd><dt>Dynamic interval</dt><dd data-value="interval">—</dd><dt>Blackout beïnvloedt voertuigen</dt><dd data-value="vehicles">—</dd><dt>Persistence ingeschakeld</dt><dd data-value="persistence">—</dd></dl>
       </section>
-      <footer><span id="connection" role="status">Wachten op server</span><span>Geen lokale statewijzigingen</span></footer>
+      <footer><span id="connection" role="status">Wachten op server</span><span>ENVIRONMENT CONSOLE</span></footer>
     </div>
   </main>
 </body>

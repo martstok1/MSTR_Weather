@@ -45,5 +45,6 @@ ui_page 'web/index.html'
 files {
     'web/index.html',
     'web/style.css',
+    'web/theme.js',
     'web/app.js'
 }
