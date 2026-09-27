@@ -38,8 +38,17 @@ MSTR.Logging.Record('startup', nil, MSTR.State.GetSnapshot(), { origin = 'startu
 
 local syncRequestTimes = {}
 
+local function RegisterAdminCommand(name, handler, restricted)
+    if name == false then return end
+    RegisterCommand(name, function(player, ...)
+        if player ~= 0 and not MSTR.Requests.Allow(player, name == Config.General.DebugCommand) then return end
+        handler(player, ...)
+    end, restricted)
+end
+
 RegisterNetEvent('mstr_weather:server:requestSync', function()
     local playerSource = source
+    if not MSTR.Utils.IsValidInteger(playerSource, 1, 2147483647) then return end
     local now = GetGameTimer()
     local lastRequest = syncRequestTimes[playerSource]
 
@@ -56,7 +65,7 @@ AddEventHandler('playerDropped', function()
     syncRequestTimes[source] = nil
 end)
 
-RegisterCommand(Config.General.DebugCommand or 'mstrdebug', function(source)
+RegisterAdminCommand(Config.General.DebugCommand, function(source)
     if source == 0 then
         print('[MSTR_Weather] /mstrdebug can only be used in-game.')
         return
@@ -87,7 +96,7 @@ RegisterCommand(Config.General.DebugCommand or 'mstrdebug', function(source)
         ))
 end, false)
 
-RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source, args)
+RegisterAdminCommand(Config.General.WeatherCommand, function(source, args)
     if source == 0 then
         print('[MSTR_Weather] /mstrweather can only be used in-game.')
         return
@@ -149,7 +158,7 @@ RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source,
     SendMessage(source, ('Weather change accepted: %s (%s)'):format(weatherType, mode))
 end, false)
 
-RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
+RegisterAdminCommand(Config.General.TimeCommand, function(source, args)
     if source == 0 then
         print('[MSTR_Weather] /mstrtime can only be used in-game.')
         return
@@ -215,7 +224,7 @@ RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
 end, false)
 
 
-RegisterCommand(Config.General.BlackoutCommand or 'mstrblackout', function(source, args)
+RegisterAdminCommand(Config.General.BlackoutCommand, function(source, args)
     if source == 0 then
         print('[MSTR_Weather] /mstrblackout can only be used in-game.')
         return

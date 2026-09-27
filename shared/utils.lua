@@ -47,7 +47,7 @@ function Utils.IsValidBoolean(value)
 end
 
 function Utils.NormalizeWeatherType(value)
-    if type(value) ~= 'string' then
+    if type(value) ~= 'string' or #value > 32 then
         return nil
     end
 
@@ -175,7 +175,9 @@ function Utils.ValidateConfig()
     local seen, invalidCommands = {}, false
     for key in pairs(commands) do
         local value = general[key]
-        if type(value) ~= 'string' or not value:match('^[%w_-]+$') then
+        if value == false and key ~= 'MenuCommand' then
+            -- Optional commands stay disabled, including during fallback normalization.
+        elseif type(value) ~= 'string' or not value:match('^[%w_-]+$') then
             invalidCommands = true
         elseif seen[value:lower()] then
             invalidCommands = true
@@ -185,7 +187,9 @@ function Utils.ValidateConfig()
     end
     if invalidCommands then
         Utils.Warn('Invalid/duplicate command names; using default command names')
-        for key, value in pairs(commands) do general[key] = value end
+        for key, value in pairs(commands) do
+            if general[key] ~= false or key == 'MenuCommand' then general[key] = value end
+        end
     end
 
     local permissions = group('Permissions')

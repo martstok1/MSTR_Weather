@@ -61,6 +61,7 @@ function ClientTime.GetCurrentMinutes()
 end
 
 RegisterNetEvent('mstr_weather:client:timeSync', function(payload)
+    if source ~= 65535 then return end
     ClientTime.ApplySync(payload)
 end)
 

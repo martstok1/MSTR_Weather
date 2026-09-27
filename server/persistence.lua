@@ -30,7 +30,7 @@ local function GetFilePath()
 end
 
 local function DecodeJson(raw)
-    if type(raw) ~= 'string' or raw == '' then
+    if type(raw) ~= 'string' or raw == '' or #raw > 262144 then
         return nil
     end
 
@@ -185,13 +185,13 @@ function Persistence.SaveState(reason)
     -- On the first save, seed the backup with the new valid state instead.
     local backup = lastGoodRaw or encoded
     local backupSaved = SaveResourceFile(resourceName, path .. '.bak', backup, #backup)
-    if backupSaved ~= true and backupSaved ~= 1 then
+    if (backupSaved ~= true and backupSaved ~= 1) or LoadResourceFile(resourceName, path .. '.bak') ~= backup then
         MSTR.Utils.Warn('Failed to write persistence backup; keeping primary untouched')
         return false
     end
     local saved = SaveResourceFile(resourceName, path, encoded, #encoded)
 
-    if saved ~= true and saved ~= 1 then
+    if (saved ~= true and saved ~= 1) or LoadResourceFile(resourceName, path) ~= encoded then
         MSTR.Utils.Warn(('Failed to save state to %s'):format(path))
         return false
     end

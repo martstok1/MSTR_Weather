@@ -25,6 +25,7 @@ shared_scripts {
 
 server_scripts {
     'server/permissions.lua',
+    'server/requests.lua',
     'server/logging.lua',
     'server/persistence.lua',
     'server/state.lua',

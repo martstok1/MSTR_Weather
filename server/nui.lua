@@ -1,5 +1,5 @@
 -- NUI transport: authorization/validation on every request, engines own mutations.
-local lastSnapshot, lastAction = {}, {}
+local lastSnapshot, lastRateReply = {}, {}
 local function Snapshot(player)
     local permissions = MSTR.Permissions.GetCapabilities(player)
     if not permissions.view then return { allowed = false, locale = Config.General.Locale } end
@@ -74,11 +74,13 @@ end
 RegisterNetEvent('mstr_weather:server:uiAction', function(requestId, action, payload)
     local player, now = source, GetGameTimer()
     if not ValidRequest(player, requestId) or type(action) ~= 'string' or #action > 24 then return end
-    if lastAction[player] and MSTR.Utils.ElapsedMs(now, lastAction[player]) < 500 then
-        TriggerClientEvent('mstr_weather:client:uiAction', player, { requestId = requestId, ok = false, reason = 'rate' })
+    if not MSTR.Requests.Allow(player) then
+        if not lastRateReply[player] or MSTR.Utils.ElapsedMs(now, lastRateReply[player]) >= 500 then
+            lastRateReply[player] = now
+            TriggerClientEvent('mstr_weather:client:uiAction', player, { requestId = requestId, ok = false, reason = 'rate' })
+        end
         return
     end
-    lastAction[player] = now
     local ok, reason, panel, logs = Perform(player, action, payload)
     if ok and (action == 'user' or action == 'settings') then panel = MSTR.Admin.GetPanel(player) end
     TriggerClientEvent('mstr_weather:client:uiAction', player, {
@@ -88,5 +90,5 @@ RegisterNetEvent('mstr_weather:server:uiAction', function(requestId, action, pay
 end)
 
 AddEventHandler('playerDropped', function()
-    lastSnapshot[source], lastAction[source] = nil, nil
+    lastSnapshot[source], lastRateReply[source] = nil, nil
 end)

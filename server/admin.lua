@@ -116,7 +116,7 @@ local function Save(candidate)
     local resource = GetCurrentResourceName()
     local backup = lastRaw or json.encode(data)
     local saved = SaveResourceFile(resource, path .. '.bak', backup, #backup)
-    if saved ~= true and saved ~= 1 then return false, 'storage' end
+    if (saved ~= true and saved ~= 1) or LoadResourceFile(resource, path .. '.bak') ~= backup then return false, 'storage' end
     saved = SaveResourceFile(resource, path, raw, #raw)
     if (saved ~= true and saved ~= 1) or LoadResourceFile(resource, path) ~= raw then
         locked = true -- A partial primary write must never silently grant stale rights.

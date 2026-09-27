@@ -10,7 +10,7 @@ Current development status:
 - Phase 4 — Dynamic Weather
 - Phase 5 — Blackout + Persistence
 
-Status: Fase 7 — branding en logging gereed voor ingame tests.
+Status: Fase 8 — code-audit en gerichte fixes gereed voor ingame hercontrole.
 Fase 1–5, Fase 6A, persoonlijke thema's en synchronisatie met een tweede speler
 zijn door Mart goedgekeurd. Resmon bleef tijdens die tests zichtbaar op 0.
 Start met `/mstrmenu` (of `mstrmenu` in F8). Vereist toegang via ACE of Beheer.
@@ -19,9 +19,16 @@ uitsluitend terwijl het menu openstaat. De klok is een servermomentopname.
 Sluit met Escape, de sluitknop of nogmaals het command.
 
 Volg [Instructions/FASE_6B_TESTPLAN.md](Instructions/FASE_6B_TESTPLAN.md).
-De nieuwe bediening en rechten moeten eerst ingame worden goedgekeurd.
-Fase 7 voegt configureerbare branding en een hoofdadmin-logboek toe; dit moet
-nog ingame worden getest.
+Fase 6 inclusief bediening, talen en iconen en Fase 7 zijn door Mart ingame
+goedgekeurd op 27 september 2026. Die goedkeuring geldt voor de vorige versies;
+de gerichte Fase 8-fixes moeten nog ingame worden gecontroleerd.
+
+Zie [het auditrapport en meetplan](Instructions/FASE_8_AUDIT.md). De drie
+beheercommands staan op `false`, overeenkomstig de uitgecommentarieerde regels
+op main. `false` schakelt registratie nu daadwerkelijk uit. Zet een commandnaam
+terug om dat command weer te activeren. Commands en NUI-acties delen een limiet
+van één verzoek per speler per 500 ms; een te snel command wordt genegeerd.
+Rechtencontrole blijft altijd van toepassing. Menu openen en sync blijven werken.
 
 ## Fase 7: branding en logging
 
@@ -95,7 +102,7 @@ ze veranderen niets voor andere admins en niets in `config.lua` of `state.json`.
 Een gewiste cache, andere computer of gewijzigde resource-origin kan de voorkeur
 resetten. Als opslag niet lukt blijft het thema deze sessie bruikbaar met melding.
 Dit is een expliciet gevraagde cosmetische uitbreiding binnen de Fase 6-tests;
-de Fase 6B-bediening behoudt deze voorkeuren. Fase 7 is nog niet gebouwd.
+de Fase 6B-bediening behoudt deze voorkeuren. Fase 7 is inmiddels goedgekeurd.
 
 Test: alle presets, eigen lichte/donkere kleuren, foute hexcode, reset,
 sluiten/heropenen en reconnect. Controleer ook join zonder menu (transparant),
@@ -140,7 +147,7 @@ ontbreekt, noteer gamebuild, tijd, andere weerresources en F8/servermeldingen.
 Nativebron: [Cfx weather types](https://github.com/citizenfx/natives/blob/master/MISC/SetWeatherTypeNow.md).
 
 Vervolg met [het afwerkingstestplan](Instructions/FASE_6B_AFWERKING_TESTPLAN.md).
-Deze uitbreiding is nog niet ingame goedgekeurd; Fase 7 blijft uitgesteld.
+Deze uitbreiding en Fase 7 zijn inmiddels ingame goedgekeurd.
 
 Volg [Instructions/FASE_1_5_TESTPLAN.md](Instructions/FASE_1_5_TESTPLAN.md).
 Stop de resource en maak vóór de update een backup van je lokale
@@ -175,6 +182,8 @@ lua5.4 tests/phase1_5.lua
 lua5.4 tests/phase6.lua
 lua5.4 tests/phase6b.lua
 lua5.4 tests/phase6c.lua
+lua5.4 tests/phase7.lua
+lua5.4 tests/phase8.lua
 node tests/theme.cjs
 node tests/controls.cjs
 node tests/locales.cjs
