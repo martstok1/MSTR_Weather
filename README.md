@@ -21,7 +21,28 @@ Volgens de werkinstructie testen we eerst read-only voordat de controls worden
 gebouwd. Logs en configureerbare branding horen bij Fase 7; geen lege Logs-tab.
 Eerdere ingame testresultaten zijn niet automatisch als geslaagd aangemerkt.
 
-## Testen vóór Fase 6
+## Persoonlijke menukleuren
+
+Onder **Settings → Jouw uitstraling** kies je Champagne (standaard), Jade,
+Arctic of Amethyst. Accent, achtergrond en panelen zijn ook vrij instelbaar met
+een kleurkiezer of `#RRGGBB`-hexcode. Hexcodes bevestig je met Enter of door het
+veld te verlaten. De tekstkleur past zich aan op lichte/donkere achtergronden.
+**Standaard herstellen** zet Champagne terug.
+
+Thema's worden lokaal in NUI-browseropslag bewaard, per apparaat/resource-origin;
+ze veranderen niets voor andere admins en niets in `config.lua` of `state.json`.
+Een gewiste cache, andere computer of gewijzigde resource-origin kan de voorkeur
+resetten. Als opslag niet lukt blijft het thema deze sessie bruikbaar met melding.
+Dit is een expliciet gevraagde cosmetische uitbreiding binnen de Fase 6-tests;
+de weather/time-controls en Fase 7 branding/logging zijn nog niet gebouwd.
+
+Test: alle presets, eigen lichte/donkere kleuren, foute hexcode, reset,
+sluiten/heropenen en reconnect. Controleer ook join zonder menu (transparant),
+Escape/focus, de kleurkiezer in FiveM, Settings-scroll op 1280×720 en live updates.
+Automatische themalogicatest: `node tests/theme.cjs`. Visuele CEF-validatie blijft
+ingame nodig; de browserdownload in de ontwikkelomgeving is mislukt.
+
+## Eerdere core-tests
 
 Volg [Instructions/FASE_1_5_TESTPLAN.md](Instructions/FASE_1_5_TESTPLAN.md).
 Stop de resource en maak vóór de update een backup van je lokale
