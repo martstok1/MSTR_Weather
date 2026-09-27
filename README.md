@@ -10,7 +10,7 @@ Current development status:
 - Phase 4 — Dynamic Weather
 - Phase 5 — Blackout + Persistence
 
-Status: Fase 6B — bediening, hoofdadminbeheer en weericonen gereed voor ingame tests.
+Status: Fase 7 — branding en logging gereed voor ingame tests.
 Fase 1–5, Fase 6A, persoonlijke thema's en synchronisatie met een tweede speler
 zijn door Mart goedgekeurd. Resmon bleef tijdens die tests zichtbaar op 0.
 Start met `/mstrmenu` (of `mstrmenu` in F8). Vereist toegang via ACE of Beheer.
@@ -20,7 +20,22 @@ Sluit met Escape, de sluitknop of nogmaals het command.
 
 Volg [Instructions/FASE_6B_TESTPLAN.md](Instructions/FASE_6B_TESTPLAN.md).
 De nieuwe bediening en rechten moeten eerst ingame worden goedgekeurd.
-Logs en configureerbare branding horen bij Fase 7; die fase is niet gestart.
+Fase 7 voegt configureerbare branding en een hoofdadmin-logboek toe; dit moet
+nog ingame worden getest.
+
+## Fase 7: branding en logging
+
+Branding komt uitsluitend uit `Config.Branding`: `Name`, `Logo` en `ShowName`.
+Gebruik lokale `images/default.svg`, een PNG of een WEBP. Een ongeldig of
+ontbrekend logo gebruikt automatisch de standaardfallback. De naam wordt veilig
+afgekapt en kan verborgen worden zonder de layout te breken.
+
+Hoofdadmins hebben een Logs-tab. Deze toont server-side vastgelegde ADMIN- en
+SYSTEM-acties met timestamp, bron, speler/identifier, actie en oude/nieuwe
+waarde. De geschiedenis staat alleen in het geheugen van de resourcesessie en
+heeft een begrensde ring (`Config.Logging.MaxEntries`, 10–1000). Alleen de
+hoofdadmin-ACE kan logs lezen; iedere aanvraag wordt opnieuw gecontroleerd.
+Zie [Instructions/FASE_7_TESTPLAN.md](Instructions/FASE_7_TESTPLAN.md).
 
 ## Hoofdadmin en gedelegeerde rechten
 

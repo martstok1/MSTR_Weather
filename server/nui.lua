@@ -10,7 +10,8 @@ local function Snapshot(player)
         allowed = true, locale = Config.General.Locale, permissions = permissions, state = MSTR.State.GetSnapshot(),
         transitionRemaining = MSTR.WeatherEngine.GetTransitionRemainingSeconds(),
         nextDynamicSeconds = MSTR.WeatherEngine.GetNextDynamicChangeSeconds(),
-        settings = settings, weatherTypes = MSTR.Constants.WeatherTypes
+        settings = settings, weatherTypes = MSTR.Constants.WeatherTypes,
+        branding = { name = Config.Branding.Name, logo = Config.Branding.Logo, showName = Config.Branding.ShowName }
     }
 end
 
@@ -32,7 +33,7 @@ end)
 local actionRights = {
     weather = 'weather', time = 'time', freeze = 'time', scale = 'time',
     dynamic = 'dynamic', blackout = 'blackout',
-    panel = 'manage', settings = 'manage', user = 'manage'
+    panel = 'manage', settings = 'manage', user = 'manage', logs = 'manage'
 }
 
 local function Perform(player, action, p)
@@ -40,6 +41,11 @@ local function Perform(player, action, p)
     if not right then return false, 'invalid' end
     if not MSTR.Permissions.Can(player, right) then return false, 'forbidden' end
     if type(p) ~= 'table' then return false, 'invalid' end
+    local actor = { player = player, origin = 'nui' }
+    if action == 'logs' then
+        local page, reason = MSTR.Logging.GetPage(player, p.before)
+        return page ~= nil, reason, nil, page
+    end
     if action == 'panel' then return true, nil, MSTR.Admin.GetPanel(player) end
     if action == 'settings' then
         return MSTR.Admin.UpdateSettings(player, p.settings, p.revision)
@@ -48,17 +54,17 @@ local function Perform(player, action, p)
     elseif action == 'weather' then
         if not MSTR.Utils.IsValidWeatherType(p.weather) or type(p.instant) ~= 'boolean' then return false, 'invalid' end
         if p.instant and not Config.Weather.AllowInstantChange then return false, 'instant_disabled' end
-        return MSTR.WeatherEngine.SetWeather(p.weather, p.instant)
+        return MSTR.WeatherEngine.SetWeather(p.weather, p.instant, actor)
     elseif action == 'time' then
-        return MSTR.TimeEngine.SetTime(p.hour, p.minute)
+        return MSTR.TimeEngine.SetTime(p.hour, p.minute, actor)
     elseif action == 'scale' then
-        return MSTR.TimeEngine.SetTimeScale(p.value)
+        return MSTR.TimeEngine.SetTimeScale(p.value, actor)
     elseif action == 'freeze' then
-        return MSTR.TimeEngine.SetTimeFrozen(p.value)
+        return MSTR.TimeEngine.SetTimeFrozen(p.value, actor)
     elseif action == 'dynamic' then
-        return MSTR.WeatherEngine.SetDynamicWeather(p.value)
+        return MSTR.WeatherEngine.SetDynamicWeather(p.value, actor)
     elseif action == 'blackout' then
-        if not MSTR.State.SetBlackout(p.value) then return false, 'invalid' end
+        if not MSTR.State.SetBlackout(p.value, actor) then return false, 'invalid' end
         MSTR.Persistence.MarkDirty('NUI blackout')
         return true
     end
@@ -73,11 +79,11 @@ RegisterNetEvent('mstr_weather:server:uiAction', function(requestId, action, pay
         return
     end
     lastAction[player] = now
-    local ok, reason, panel = Perform(player, action, payload)
+    local ok, reason, panel, logs = Perform(player, action, payload)
     if ok and (action == 'user' or action == 'settings') then panel = MSTR.Admin.GetPanel(player) end
     TriggerClientEvent('mstr_weather:client:uiAction', player, {
         requestId = requestId, ok = ok == true, reason = reason or (not ok and 'invalid' or nil),
-        panel = panel, snapshot = Snapshot(player)
+        panel = panel, logs = logs, snapshot = Snapshot(player)
     })
 end)
 

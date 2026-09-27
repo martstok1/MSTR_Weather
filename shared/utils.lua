@@ -156,6 +156,19 @@ function Utils.ValidateConfig()
 
     boolean(Config, 'Debug', false)
     local general = group('General')
+    local logging = group('Logging')
+    boolean(logging, 'Enabled', true)
+    number(logging, 'MaxEntries', 200, 10, 1000, true)
+    local branding = group('Branding')
+    if type(branding.Name) ~= 'string' or not branding.Name:find('%S') then branding.Name = 'MSTR Weather' end
+    branding.Name = branding.Name:gsub('%c', ' '):sub(1, 160)
+    boolean(branding, 'ShowName', true)
+    local logo = branding.Logo
+    if type(logo) ~= 'string' or #logo > 128 or logo:find('..', 1, true)
+        or (logo ~= 'images/default.svg' and not logo:match('^images/[%w_-]+%.png$')
+            and not logo:match('^images/[%w_-]+%.webp$')) then
+        branding.Logo = 'images/default.svg'
+    end
     if general.Locale ~= 'nl' and general.Locale ~= 'en' then general.Locale = 'nl' end
     local commands = { DebugCommand = 'mstrdebug', WeatherCommand = 'mstrweather',
         TimeCommand = 'mstrtime', BlackoutCommand = 'mstrblackout', MenuCommand = 'mstrmenu' }

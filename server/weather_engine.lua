@@ -106,6 +106,7 @@ local function CompleteTransition(serial, targetWeather)
         return
     end
 
+    local previous = MSTR.State.GetWeather()
     if not MSTR.State.SetWeather(targetWeather) then
         MSTR.Utils.Warn(('Failed to commit weather transition target %s'):format(tostring(targetWeather)))
         return
@@ -120,6 +121,7 @@ local function CompleteTransition(serial, targetWeather)
     end
 
     MSTR.Utils.Debug(('Weather transition completed: %s'):format(targetWeather))
+    MSTR.Logging.Record('transition', previous, targetWeather, { origin = 'transition' })
 end
 
 function WeatherEngine.Initialize()
@@ -174,7 +176,7 @@ function WeatherEngine.GetNextWeatherType(currentWeather)
     return SAFE_NEXT[normalized] or 'CLEAR'
 end
 
-function WeatherEngine.SetWeather(weatherType, instant)
+function WeatherEngine.SetWeather(weatherType, instant, actor)
     local targetWeather = MSTR.Utils.NormalizeWeatherType(weatherType)
 
     if not targetWeather then
@@ -184,6 +186,7 @@ function WeatherEngine.SetWeather(weatherType, instant)
 
     local currentWeather = MSTR.State.GetWeather()
     local useInstant = instant == true and Config.Weather.AllowInstantChange == true
+    local previous = { weather = currentWeather, target = activeTransition and activeTransition.target or currentWeather }
 
     -- A third weather cannot be represented by the current two-weather blend.
     -- Keep the active blend intact; admins can explicitly interrupt with instant.
@@ -210,12 +213,14 @@ function WeatherEngine.SetWeather(weatherType, instant)
         end
 
         MSTR.Utils.Debug(('Weather set instantly: %s'):format(targetWeather))
+        MSTR.Logging.Record('weather', previous, { weather = targetWeather, mode = 'instant', duration = 0 }, actor)
         return true
     end
 
     if currentWeather == targetWeather and not activeTransition then
         BroadcastWeather(currentWeather, currentWeather, 0)
         ResetDynamicTimer('weather unchanged')
+        MSTR.Logging.Record('weather', previous, { weather = targetWeather, mode = 'unchanged', duration = 0 }, actor)
         return true
     end
 
@@ -242,6 +247,7 @@ function WeatherEngine.SetWeather(weatherType, instant)
 
     MSTR.Utils.Debug(('Weather transition started: %s -> %s (%ss)')
         :format(currentWeather, targetWeather, tostring(duration)))
+    MSTR.Logging.Record('weather', previous, { weather = targetWeather, mode = 'smooth', duration = duration }, actor)
 
     CreateThread(function()
         Wait(math.floor(duration * 1000))
@@ -251,11 +257,12 @@ function WeatherEngine.SetWeather(weatherType, instant)
     return true
 end
 
-function WeatherEngine.SetDynamicWeather(enabled)
+function WeatherEngine.SetDynamicWeather(enabled, actor)
     if not MSTR.Utils.IsValidBoolean(enabled) then
         return false
     end
 
+    local previous = MSTR.State.GetDynamicWeather()
     if not MSTR.State.SetDynamicWeather(enabled) then
         return false
     end
@@ -274,6 +281,7 @@ function WeatherEngine.SetDynamicWeather(enabled)
         MSTR.Persistence.MarkDirty('dynamic weather changed')
     end
 
+    if previous ~= enabled then MSTR.Logging.Record('dynamic', previous, enabled, actor) end
     return true
 end
 
@@ -366,7 +374,7 @@ function WeatherEngine.RunDynamicCycle()
         return true, 'unchanged'
     end
 
-    local success = WeatherEngine.SetWeather(nextWeather, false)
+    local success = WeatherEngine.SetWeather(nextWeather, false, { origin = 'dynamic' })
 
     if not success then
         ResetDynamicTimer('weather change failed')

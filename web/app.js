@@ -59,6 +59,8 @@ window.MSTRReceiveSnapshot = p => {
   const wasHidden = app.hidden;
   app.hidden = false;
   window.MSTRControls.update(p);
+  window.MSTRBranding?.apply(p.branding);
+  window.MSTRLogs?.locale();
   window.MSTRIcons(s);
   window.MSTRLocale.refresh();
   receivedAt = Date.now();

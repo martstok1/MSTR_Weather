@@ -85,11 +85,12 @@ function TimeEngine.BroadcastSync()
     TriggerClientEvent('mstr_weather:client:timeSync', -1, TimeEngine.GetSyncPayload())
 end
 
-function TimeEngine.SetTime(hour, minute)
+function TimeEngine.SetTime(hour, minute, actor)
     if not MSTR.Utils.IsValidInteger(hour, 0, 23) or not MSTR.Utils.IsValidInteger(minute, 0, 59) then
         return false
     end
 
+    local previous = TimeEngine.GetCurrentClock()
     Rebase((hour * 60) + minute)
     MSTR.State.SetTime(hour, minute)
     TimeEngine.BroadcastSync()
@@ -99,14 +100,16 @@ function TimeEngine.SetTime(hour, minute)
     end
 
     MSTR.Utils.Debug(('Time set to %02d:%02d'):format(hour, minute))
+    MSTR.Logging.Record('time', previous, TimeEngine.GetCurrentClock(), actor)
     return true
 end
 
-function TimeEngine.SetTimeScale(newScale)
+function TimeEngine.SetTimeScale(newScale, actor)
     if not MSTR.Utils.IsValidNumber(newScale, Config.Time.MinCycleSpeed, Config.Time.MaxCycleSpeed) then
         return false
     end
 
+    local previous = scale
     local currentMinutes = TimeEngine.GetCurrentMinutes()
     Rebase(currentMinutes)
     scale = newScale
@@ -123,14 +126,16 @@ function TimeEngine.SetTimeScale(newScale)
     end
 
     MSTR.Utils.Debug(('Time scale set to %s'):format(tostring(newScale)))
+    if previous ~= newScale then MSTR.Logging.Record('scale', previous, newScale, actor) end
     return true
 end
 
-function TimeEngine.SetTimeFrozen(shouldFreeze)
+function TimeEngine.SetTimeFrozen(shouldFreeze, actor)
     if not MSTR.Utils.IsValidBoolean(shouldFreeze) then
         return false
     end
 
+    local previous = frozen
     local currentMinutes = TimeEngine.GetCurrentMinutes()
     Rebase(currentMinutes)
     frozen = shouldFreeze
@@ -147,6 +152,7 @@ function TimeEngine.SetTimeFrozen(shouldFreeze)
     end
 
     MSTR.Utils.Debug(('Time frozen set to %s'):format(tostring(shouldFreeze)))
+    if previous ~= shouldFreeze then MSTR.Logging.Record('freeze', previous, shouldFreeze, actor) end
     return true
 end
 

@@ -6,6 +6,8 @@
   <title>Environment console</title>
   <link rel="stylesheet" href="style.css">
   <script src="locales.js" defer></script>
+  <script src="branding.js" defer></script>
+  <script src="logs.js" defer></script>
   <script src="theme.js" defer></script>
   <script src="icons.js" defer></script>
   <script src="controls.js" defer></script>
@@ -14,21 +16,19 @@
 <body>
   <main id="app" hidden aria-label="Environment console">
     <aside>
-      <div class="mark" aria-hidden="true">◈</div>
-      <div class="eyebrow">ADMIN CONSOLE</div>
-      <h1>Environment<span>Weather &amp; time</span></h1>
+      <div class="brand-mark"><img id="brand-logo" alt="" hidden><span id="brand-fallback" aria-hidden="true">◈</span></div>
+      <h1 id="brand-name" data-no-localize>Environment</h1>
       <nav aria-label="Pagina’s">
         <button data-page="dashboard" aria-current="page">Dashboard <span>01</span></button>
         <button data-page="weather">Weather <span>02</span></button>
         <button data-page="time">Time <span>03</span></button>
         <button data-page="settings">Settings <span>04</span></button>
-        <button data-page="admin" data-permission="manage" hidden>Beheer <span>05</span></button>
+        <button data-page="admin" data-permission="manage" hidden>Beheer <span>05</span></button><button data-page="logs" data-permission="manage" hidden>Logs <span>06</span></button>
       </nav>
-      <div class="sidebar-bottom"><span class="dot"></span> Live synchronisatie<br><small>WEATHER &amp; TIME CONTROL</small></div>
+      <div class="sidebar-bottom"><span class="dot"></span> Live synchronisatie</div>
     </aside>
     <div class="workspace">
       <header><div><div class="eyebrow">LIVE ENVIRONMENT</div><h2 id="page-title">Dashboard</h2></div><button id="close" aria-label="Menu sluiten">Sluiten <kbd>Esc</kbd></button></header>
-      <div class="notice"><span class="notice-label">LIVE OVERZICHT</span> Beschikbare bediening hangt af van jouw rechten. Kleuren aanpassen kan via Settings.</div>
       <p id="action-status" role="status" aria-live="polite"></p>
       <section id="dashboard" class="page">
         <div class="hero weather-hero"><div id="weather-icon" class="weather-illustration" role="img" aria-label="Weer"></div><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
@@ -100,7 +100,8 @@
           </form>
         </div>
       </section>
-      <footer><span id="connection" role="status">Wachten op server</span><span>ENVIRONMENT CONSOLE</span></footer>
+      <section id="logs" class="page" hidden><div class="section-heading"><div><div class="eyebrow">AUDIT TRAIL</div><h3 class="section-title">Logs</h3></div><button id="logs-refresh" class="quiet-button">Opnieuw laden</button></div><p class="muted">Hoofdadminacties en systeemwijzigingen uit deze resourcesessie.</p><div id="logs-status" role="status"></div><div id="logs-list" class="logs-list"></div><button id="logs-more" class="quiet-button" hidden>Oudere logs laden</button></section>
+      <footer><span id="connection" role="status">Wachten op server</span></footer>
     </div>
   </main>
 </body>
