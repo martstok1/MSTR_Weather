@@ -36,7 +36,7 @@ bestaande brede ACE's/inheritance: die kunnen dezelfde toestemming geven.
 De resource kan alleen de effectieve ACE controleren, niet wie jij bent.
 Voor uitleg: [Cfx identifiers](https://docs.fivem.net/docs/scripting-reference/runtimes/lua/functions/GetPlayerIdentifiers/).
 
-Alleen deze ACE opent **Beheer**: zes serverinstellingen en per persoon vinkjes
+Alleen deze ACE opent **Beheer**: zes weer/tijd-instellingen, servertaal en per persoon vinkjes
 voor menu bekijken, weer, tijd, dynamic weather en blackout. Hoofdadminrechten
 zijn nooit via het menu toe te kennen. Commands controleren dezelfde rechten.
 Gebruik in het menu `fivem:123456` of een lowercase `license:` met 40 hextekens.
@@ -69,7 +69,7 @@ om overschrijven vanuit een verouderd beheerformulier te weigeren.
 
 ## Persoonlijke menukleuren
 
-Onder **Settings → Jouw uitstraling** kies je Champagne (standaard), Jade,
+Onder **Instellingen → Jouw uitstraling** kies je Champagne (standaard), Jade,
 Arctic of Amethyst. Accent, achtergrond en panelen zijn ook vrij instelbaar met
 een kleurkiezer of `#RRGGBB`-hexcode. Hexcodes bevestig je met Enter of door het
 veld te verlaten. De tekstkleur past zich aan op lichte/donkere achtergronden.
@@ -89,6 +89,43 @@ Automatische themalogicatest: `node tests/theme.cjs`. Visuele CEF-validatie blij
 ingame nodig; de browserdownload in de ontwikkelomgeving is mislukt.
 
 ## Eerdere core-tests
+
+### Fase 6B — taal en visuele afwerking
+
+**Beheer → Servertaal** kiest Nederlands of Engels voor alle spelers. De taal
+wordt server-side gevalideerd en samen met de andere beheerinstellingen in
+`data/admin.json` opgeslagen. `Config.General.Locale` is alleen de startdefault
+(`nl`/`en`). Bestaande beheerbestanden zonder taalveld nemen die default over;
+de bestaande rechten blijven behouden. Opslaan vereist de hoofdadmin-ACE.
+
+Open menu's volgen de opgeslagen taal binnen circa twee seconden; bij opnieuw
+openen geldt direct de servertaal. Navigatie, labels, weernamen, foutmeldingen,
+themafeedback en commandfeedback zijn vertaald. Persoonsnamen, identifiers,
+commando's en technische argumenten zoals `smooth`, `instant` en `true|false`
+blijven ongewijzigd. Technische serverdiagnostiek is geen menutekst.
+De persoonlijke kleurvoorkeur blijft apart en heeft geen eigen taalkeuze.
+
+Het configuratieoverzicht is verwijderd uit Instellingen. Beheer toont de
+instellingen alleen aan hoofdadmins; gewone snapshots bevatten uitsluitend
+de grenzen die de bediening nodig heeft (tijdsnelheid en direct wijzigen).
+
+Het tijdpaneel toont dagdelen op basis van de gesynchroniseerde spelklok:
+05:00–07:00 zonsopkomst, 07:00–19:00 dag, 19:00–21:00 zonsondergang en
+21:00–05:00 nacht. Dit zijn vaste UI-tijdvakken, geen astronomische berekening.
+De illustraties onderscheiden smog/mist, één/drie wolken en één/twee/drie
+sneeuwvlokken. Opklaringen heeft een zon achter de wolk; Halloween een volle
+maan met vleermuis.
+
+Halloween gebruikt dezelfde bestaande weather-native als de andere weertypes.
+De automatische neerslag van dit weertype wordt nu vrijgegeven in plaats van
+op nul geforceerd. De automatische test bewijst native-aanroep en cleanup,
+niet het uiteindelijke GTA-effect. Test Halloween buiten, met dynamisch weer
+uit, zowel direct als geleidelijk; vergelijk dag en nacht. Als het effect nog
+ontbreekt, noteer gamebuild, tijd, andere weerresources en F8/servermeldingen.
+Nativebron: [Cfx weather types](https://github.com/citizenfx/natives/blob/master/MISC/SetWeatherTypeNow.md).
+
+Vervolg met [het afwerkingstestplan](Instructions/FASE_6B_AFWERKING_TESTPLAN.md).
+Deze uitbreiding is nog niet ingame goedgekeurd; Fase 7 blijft uitgesteld.
 
 Volg [Instructions/FASE_1_5_TESTPLAN.md](Instructions/FASE_1_5_TESTPLAN.md).
 Stop de resource en maak vóór de update een backup van je lokale
@@ -122,8 +159,10 @@ Vanuit de repository-root, met Lua 5.4:
 lua5.4 tests/phase1_5.lua
 lua5.4 tests/phase6.lua
 lua5.4 tests/phase6b.lua
+lua5.4 tests/phase6c.lua
 node tests/theme.cjs
 node tests/controls.cjs
+node tests/locales.cjs
 ```
 
 De tweede opdracht draait de 16 core-tests plus 4 NUI-security/lifecycle-tests.

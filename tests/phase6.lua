@@ -18,7 +18,8 @@ test('server: ACE per refresh, malformed ids, throttle, drop cleanup, no writes'
     r.emit(endpoint, 2); assert(#r.events == 1)
     r.advance(1000); r.emit(endpoint, 2)
     local p = r.events[2].payload
-    assert(p.allowed and p.state.blackout == false and p.settings.persistenceEnabled)
+    assert(p.allowed and p.state.blackout == false and p.settings.persistenceEnabled == nil)
+    assert(p.settings.minScale == r.env.Config.Time.MinCycleSpeed and p.locale == 'nl')
     assert(p.state.time.second > 0 and p.requestId == 2)
     r.ace = false; r.advance(1000); r.emit(endpoint, 3)
     assert(r.events[3].payload.allowed == false)
