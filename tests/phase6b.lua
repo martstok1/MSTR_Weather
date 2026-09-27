@@ -37,10 +37,10 @@ test('rights persist; granular commands cannot bypass delegation or revocation',
     local r = owner(); local m = r.env.MSTR
     assert(m.Admin.UpdateUser(1, 'fivem:2', 'Tester', rights(true, true), 0))
     assert(m.Permissions.Can(2, 'weather') and not m.Permissions.Can(2, 'time'))
-    r.commands.mstrtime(2, { '18:00' }); assert(m.TimeEngine.GetCurrentClock().hour == 12)
-    r.commands.mstrweather(2, { 'dynamic', 'false' }); assert(m.State.GetDynamicWeather())
-    r.commands.mstrblackout(2, { 'true' }); assert(not m.State.GetBlackout())
-    r.commands.mstrweather(2, { 'RAIN', 'instant' }); assert(m.State.GetWeather() == 'RAIN')
+    r.advance(500); r.commands.mstrtime(2, { '18:00' }); assert(m.TimeEngine.GetCurrentClock().hour == 12)
+    r.advance(500); r.commands.mstrweather(2, { 'dynamic', 'false' }); assert(m.State.GetDynamicWeather())
+    r.advance(500); r.commands.mstrblackout(2, { 'true' }); assert(not m.State.GetBlackout())
+    r.advance(500); r.commands.mstrweather(2, { 'RAIN', 'instant' }); assert(m.State.GetWeather() == 'RAIN')
     local saved = r.encoded[r.files['data/admin.json']]
     local reboot = runtime({ files = { ['data/admin.json'] = 'stored' }, decoded = { stored = saved } })
     assert(reboot.env.MSTR.Permissions.Can(2, 'weather'))

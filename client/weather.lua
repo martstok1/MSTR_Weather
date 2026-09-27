@@ -87,6 +87,7 @@ function ClientWeather.ApplySync(payload)
 end
 
 RegisterNetEvent('mstr_weather:client:weatherSync', function(payload)
+    if source ~= 65535 then return end
     ClientWeather.ApplySync(payload)
 end)
 

@@ -115,7 +115,15 @@ local function runtime(options)
     assert(loadfile('fxmanifest.lua', 't', me))()
     for _, path in ipairs(manifest.shared) do
         r.load(path)
-        if path == 'config.lua' and options.configure then options.configure(e.Config) end
+        if path == 'config.lua' then
+            -- Legacy command regressions opt into commands, independent of owner defaults.
+            if not options.productionConfig then
+                e.Config.General.WeatherCommand = 'mstrweather'
+                e.Config.General.TimeCommand = 'mstrtime'
+                e.Config.General.BlackoutCommand = 'mstrblackout'
+            end
+            if options.configure then options.configure(e.Config) end
+        end
     end
     for _, path in ipairs(manifest.server) do r.load(path) end
     function r.clients() for _, path in ipairs(manifest.client) do r.load(path) end end
@@ -137,28 +145,28 @@ check('manifest boot, ACE booleans/numbers and unauthorized commands', function(
         assert(m.Permissions.HasAdminPermission(1) == (value == true or value == 1))
     end
     r.ace = false
-    r.commands.mstrweather(1, { 'RAIN', 'instant' })
-    r.commands.mstrtime(1, { '18:30' })
-    r.commands.mstrblackout(1, { 'true' })
+    r.advance(500); r.commands.mstrweather(1, { 'RAIN', 'instant' })
+    r.advance(500); r.commands.mstrtime(1, { '18:30' })
+    r.advance(500); r.commands.mstrblackout(1, { 'true' })
     assert(m.State.GetWeather() == 'CLEAR' and not m.State.GetBlackout())
     assert(m.TimeEngine.GetCurrentClock().hour == 12)
     assert(#r.writes == 0)
     r.ace = true
-    r.commands.mstrblackout(1, { 'true' })
+    r.advance(500); r.commands.mstrblackout(1, { 'true' })
     assert(m.State.GetBlackout())
-    r.commands.mstrblackout(1, { 'false' })
+    r.advance(500); r.commands.mstrblackout(1, { 'false' })
     assert(not m.State.GetBlackout())
 end)
 
 check('invalid commands rejected and debug read-only', function()
     local r = runtime(); r.ace = true
-    r.commands.mstrweather(1, { 'NOPE' })
-    r.commands.mstrweather(1, { 'RAIN', 'NOPE' })
-    r.commands.mstrweather(1, { 'dynamic', 'maybe' })
-    r.commands.mstrtime(1, { '24:00' })
-    r.commands.mstrtime(1, { 'freeze', 'maybe' })
-    r.commands.mstrtime(1, { 'scale', '11' })
-    r.commands.mstrblackout(1, { 'maybe' })
+    r.advance(500); r.commands.mstrweather(1, { 'NOPE' })
+    r.advance(500); r.commands.mstrweather(1, { 'RAIN', 'NOPE' })
+    r.advance(500); r.commands.mstrweather(1, { 'dynamic', 'maybe' })
+    r.advance(500); r.commands.mstrtime(1, { '24:00' })
+    r.advance(500); r.commands.mstrtime(1, { 'freeze', 'maybe' })
+    r.advance(500); r.commands.mstrtime(1, { 'scale', '11' })
+    r.advance(500); r.commands.mstrblackout(1, { 'maybe' })
     r.commands.mstrdebug(1)
     r.advance(2000)
     assert(#r.writes == 0 and r.weatherEvents() == 0)
