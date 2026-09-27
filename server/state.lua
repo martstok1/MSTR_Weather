@@ -235,6 +235,12 @@ function State.SetTime(hour, minute)
 end
 
 function State.GetSnapshot()
+    -- GlobalState hour/minute are coarse replication values. Consumers such as
+    -- debug, persistence and the later NUI need the resolved live server clock.
+    local time = State.GetTime()
+    if MSTR.TimeEngine and MSTR.TimeEngine.GetCurrentClock then
+        time = MSTR.TimeEngine.GetCurrentClock()
+    end
     return {
         weather = State.GetWeather(),
         dynamicWeather = State.GetDynamicWeather(),
@@ -242,6 +248,6 @@ function State.GetSnapshot()
         blackout = State.GetBlackout(),
         timeFrozen = State.GetTimeFrozen(),
         timeScale = State.GetTimeScale(),
-        time = State.GetTime()
+        time = time
     }
 end

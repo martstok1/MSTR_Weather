@@ -4,12 +4,9 @@
 Config = {}
 
 -- Enables detailed console logging. /mstrdebug works independently of this value.
-Config.Debug = true
+Config.Debug = false
 
 Config.General = {
-    -- Reserved for the later admin UI.
-    Command = 'weather',
-
     -- Development/admin commands used while V1.0 is being built.
     DebugCommand = 'mstrdebug',
     WeatherCommand = 'mstrweather',
@@ -130,21 +127,7 @@ Config.Weather = {
         }
     },
 
-    -- Fallback weights. These are only used when a valid weather type has no
-    -- usable graph entry. Seasonal/special weather is deliberately excluded.
-    Weights = {
-        EXTRASUNNY = 10,
-        CLEAR = 30,
-        CLOUDS = 25,
-        SMOG = 5,
-        FOGGY = 5,
-        OVERCAST = 15,
-        RAIN = 8,
-        THUNDER = 2,
-        CLEARING = 10,
-        NEUTRAL = 5
-    },
-
+    -- Missing/invalid graph entries use a safe per-weather fallback in the engine.
     TransitionDuration = 30, -- seconds
     AllowInstantChange = true,
     EnableSnowTrails = true
@@ -192,11 +175,3 @@ Config.Persistence = {
     DebounceMs = 1500
 }
 
-Config.Logging = {
-    Enabled = true,
-    MaxEntries = 1000
-}
-
-Config.UI = {
-    Enabled = true
-}

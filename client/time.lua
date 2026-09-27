@@ -21,7 +21,7 @@ function ClientTime.ApplySync(payload)
     local newScale = tonumber(payload.scale)
     local newFrozen = payload.frozen
 
-    if type(minutes) ~= 'number' then
+    if not MSTR.Utils.IsValidNumber(minutes, 0, 1440) then
         MSTR.Utils.Warn('Rejected invalid client time sync: minutes')
         return
     end
@@ -44,6 +44,11 @@ function ClientTime.ApplySync(payload)
 
     MSTR.Utils.Debug(('Client time sync: minutes=%.3f scale=%s frozen=%s')
         :format(anchorMinutes, tostring(scale), tostring(frozen)))
+    return true
+end
+
+function ClientTime.IsSynced()
+    return synced
 end
 
 function ClientTime.GetCurrentMinutes()
@@ -51,7 +56,7 @@ function ClientTime.GetCurrentMinutes()
         return MSTR.Utils.WrapMinutes(anchorMinutes)
     end
 
-    local elapsedSeconds = math.max(0, GetGameTimer() - anchorTimer) / 1000.0
+    local elapsedSeconds = MSTR.Utils.ElapsedMs(GetGameTimer(), anchorTimer) / 1000.0
     return MSTR.Utils.WrapMinutes(anchorMinutes + (elapsedSeconds * (scale / 60.0)))
 end
 

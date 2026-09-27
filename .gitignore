@@ -1,0 +1,5 @@
+# Runtime-generated persistence (data/README.md keeps the directory in Git).
+/data/*.json
+/data/*.json.bak
+/data/**/*.json
+/data/**/*.json.bak

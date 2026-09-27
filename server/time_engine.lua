@@ -49,7 +49,7 @@ function TimeEngine.GetCurrentMinutes()
         return MSTR.Utils.WrapMinutes(anchorMinutes)
     end
 
-    local elapsedSeconds = math.max(0, GetGameTimer() - anchorTimer) / 1000.0
+    local elapsedSeconds = MSTR.Utils.ElapsedMs(GetGameTimer(), anchorTimer) / 1000.0
     local progressedMinutes = elapsedSeconds * (scale / 60.0)
 
     return MSTR.Utils.WrapMinutes(anchorMinutes + progressedMinutes)
@@ -167,6 +167,7 @@ function TimeEngine.StartCorrectionScheduler()
             Wait(math.floor(intervalSeconds * 1000))
 
             local currentMinutes = TimeEngine.GetCurrentMinutes()
+            Rebase(currentMinutes)
             CommitStateTime(currentMinutes)
             TimeEngine.BroadcastSync()
             MSTR.Utils.Debug('Periodic time correction broadcast')

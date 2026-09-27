@@ -4,7 +4,6 @@
   Copyright (c) 2026 Martstok. All rights reserved.
 
   This resource is original work unless otherwise stated.
-  See LICENSE for usage and distribution terms.
 
   Third-party code, libraries and assets remain subject to their
   respective licenses and copyright notices.
