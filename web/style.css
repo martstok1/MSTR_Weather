@@ -97,7 +97,7 @@ input[aria-invalid="true"] { outline: 1px solid var(--text); }
 @media (max-width: 600px) { #app { grid-template-columns: 130px minmax(0, 1fr); } .workspace { padding: 18px; } aside { padding: 18px 10px; } h1 { font-size: 16px; } .eyebrow { letter-spacing: 1px; font-size: 8px; } .cards { grid-template-columns: 1fr; } .presets { grid-template-columns: 1fr; } .section-heading { align-items: flex-start; flex-direction: column; } footer, .theme-actions { flex-direction: column; align-items: flex-start; } .sidebar-bottom small { letter-spacing: 0; } .hero { padding: 18px; } .orb { display: none; } .weather-hero .weather-name { max-width: 100%; } nav button { padding: 12px 8px; } }
 @media (prefers-reduced-motion: reduce) { button { transition: none; } }
 
-/* Phase 6B controls and local weather illustrations. No canvas-wide effects. */
+/* Controls and local weather illustrations. No canvas-wide effects. */
 .page, header, footer, .notice { flex-shrink: 0; }
 .weather-illustration { position: absolute; right: 30px; top: 28px; width: 125px; height: 125px; color: var(--surface-text); }
 .weather-illustration svg, .status-icon svg { display: block; width: 100%; height: 100%; }

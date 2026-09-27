@@ -127,7 +127,7 @@ function Utils.WrapMinutes(minutes)
     return wrapped
 end
 
--- Normalize the owner-editable values used by phases 1-5 before either side
+-- Normalize owner-editable configuration before either side
 -- starts. Bad defaults must never reach GlobalState or a clock native.
 function Utils.ValidateConfig()
     local function group(name)

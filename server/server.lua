@@ -1,5 +1,5 @@
 -- Main server entry point for MSTR_Weather
--- V1.0 development: Foundation + Weather + Time + Dynamic Weather + Blackout + Persistence
+-- Version 1.0.0
 
 print('[MSTR_Weather] Server starting...')
 

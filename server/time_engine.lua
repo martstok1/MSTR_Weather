@@ -1,5 +1,5 @@
 -- Server-authoritative Time Engine for MSTR_Weather
--- Phase 3
+-- Server-authoritative clock and synchronization.
 -- The server keeps a canonical anchor. Clients progress time locally between syncs.
 
 MSTR = MSTR or {}

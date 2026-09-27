@@ -1,5 +1,5 @@
 -- Server-authoritative Weather Engine for MSTR_Weather
--- Phase 2 + Phase 4 Dynamic Weather
+-- Weather transitions and weighted dynamic weather scheduling.
 
 MSTR = MSTR or {}
 MSTR.WeatherEngine = MSTR.WeatherEngine or {}
