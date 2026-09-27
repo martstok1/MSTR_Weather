@@ -1,4 +1,8 @@
-:root { color-scheme: dark; font-family: "Segoe UI", Arial, sans-serif; color: #e8edf4; }
+/* Keep the embedded NUI canvas transparent, including while #app is hidden.
+   A root dark color-scheme can make CEF paint an opaque iframe canvas.
+   Use explicit panel colors; do not add root color-scheme or backdrop filters. */
+:root { font-family: "Segoe UI", Arial, sans-serif; color: #e8edf4; }
+html, body { background: transparent !important; overflow: hidden; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: transparent; height: 100vh; display: grid; place-items: center; }
