@@ -251,3 +251,10 @@ function State.GetSnapshot()
         time = time
     }
 end
+
+function State.PublishSettings()
+    GlobalState['mstr:settings'] = {
+        snowTrails = Config.Weather.EnableSnowTrails,
+        affectVehicles = Config.Blackout.AffectVehicles
+    }
+end

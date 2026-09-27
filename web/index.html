@@ -6,6 +6,8 @@
   <title>Environment console</title>
   <link rel="stylesheet" href="style.css">
   <script src="theme.js" defer></script>
+  <script src="icons.js" defer></script>
+  <script src="controls.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -19,27 +21,43 @@
         <button data-page="weather">Weather <span>02</span></button>
         <button data-page="time">Time <span>03</span></button>
         <button data-page="settings">Settings <span>04</span></button>
+        <button data-page="admin" data-permission="manage" hidden>Beheer <span>05</span></button>
       </nav>
       <div class="sidebar-bottom"><span class="dot"></span> Live synchronisatie<br><small>WEATHER &amp; TIME CONTROL</small></div>
     </aside>
     <div class="workspace">
       <header><div><div class="eyebrow">LIVE ENVIRONMENT</div><h2 id="page-title">Dashboard</h2></div><button id="close" aria-label="Menu sluiten">Sluiten <kbd>Esc</kbd></button></header>
-      <div class="notice"><span class="notice-label">LIVE OVERZICHT</span> Weer en tijd zijn alleen leesbaar. Je menukleuren pas je aan via Settings.</div>
+      <div class="notice"><span class="notice-label">LIVE OVERZICHT</span> Beschikbare bediening hangt af van jouw rechten. Kleuren aanpassen kan via Settings.</div>
+      <p id="action-status" role="status" aria-live="polite"></p>
       <section id="dashboard" class="page">
-        <div class="hero weather-hero"><div class="orb" aria-hidden="true"></div><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
+        <div class="hero weather-hero"><div id="weather-icon" class="weather-illustration" role="img" aria-label="Weer"></div><div class="eyebrow">ACTUEEL WEER</div><div class="weather-name" data-value="weather">—</div><p data-value="transition">—</p></div>
         <div class="cards">
-          <article><h3>Servertijd</h3><strong data-value="clock">—</strong><p data-value="clockMode">—</p></article>
-          <article><h3>Dynamic weather</h3><strong data-value="dynamic">—</strong><p data-value="next">—</p></article>
-          <article><h3>Blackout</h3><strong data-value="blackout">—</strong><p>Globale verlichting</p></article>
+          <article><span id="time-icon" class="status-icon" aria-hidden="true"></span><h3>Servertijd</h3><strong data-value="clock">—</strong><p data-value="clockMode">—</p></article>
+          <article><span id="dynamic-icon" class="status-icon" aria-hidden="true"></span><h3>Dynamic weather</h3><strong data-value="dynamic">—</strong><p data-value="next">—</p></article>
+          <article><span id="blackout-icon" class="status-icon" aria-hidden="true"></span><h3>Blackout</h3><strong data-value="blackout">—</strong><p>Globale verlichting</p></article>
         </div>
       </section>
       <section id="weather" class="page" hidden>
         <h3 class="section-title">Weer &amp; overgangen</h3>
         <dl><dt>Huidig weer</dt><dd data-value="weather">—</dd><dt>Overgang</dt><dd data-value="transition">—</dd><dt>Automatische cyclus</dt><dd data-value="dynamic">—</dd><dt>Volgende beslissing</dt><dd data-value="next">—</dd><dt>Blackout</dt><dd data-value="blackout">—</dd></dl>
+        <form id="weather-form" class="control-box" data-permission="weather" hidden>
+          <h3>Weer instellen</h3><div class="control-row">
+            <label>Weertype<select id="weather-choice" required></select></label>
+            <label>Overgang<select id="weather-mode"><option value="smooth">Geleidelijk</option><option value="instant">Direct</option></select></label>
+            <button type="submit" data-mutation>Toepassen</button>
+          </div>
+        </form>
+        <div class="control-box" data-permission="dynamic" hidden><h3>Dynamic weather</h3><div class="button-row"><button data-action="dynamic" data-enabled="true" data-mutation>Inschakelen</button><button data-action="dynamic" data-enabled="false" data-mutation>Uitschakelen</button></div></div>
+        <div class="control-box" data-permission="blackout" hidden><h3>Blackout</h3><div class="button-row"><button data-action="blackout" data-enabled="true" data-mutation>Inschakelen</button><button data-action="blackout" data-enabled="false" data-mutation>Uitschakelen</button></div></div>
       </section>
       <section id="time" class="page" hidden>
         <div class="hero"><div class="eyebrow">ACTUELE SERVERKLOK</div><div class="weather-name" data-value="clock">—</div><p>Momentopname, elke twee seconden bijgewerkt.</p></div>
         <dl><dt>Bevroren</dt><dd data-value="frozen">—</dd><dt>Tijdsnelheid</dt><dd data-value="scale">—</dd><dt>Toegestaan bereik</dt><dd data-value="scaleRange">—</dd></dl>
+        <div data-permission="time" hidden>
+          <form id="time-form" class="control-box"><h3>Tijd instellen</h3><div class="control-row"><label>Uur<input id="time-hour" type="number" min="0" max="23" step="1" required></label><label>Minuut<input id="time-minute" type="number" min="0" max="59" step="1" required></label><button type="submit" data-mutation>Toepassen</button></div></form>
+          <form id="scale-form" class="control-box"><h3>Tijdsnelheid</h3><div class="control-row"><label>Multiplier<input id="time-scale" type="number" step="any" required></label><button type="submit" data-mutation>Toepassen</button></div></form>
+          <div class="control-box"><h3>Klok</h3><div class="button-row"><button data-action="freeze" data-enabled="true" data-mutation>Bevriezen</button><button data-action="freeze" data-enabled="false" data-mutation>Hervatten</button></div></div>
+        </div>
       </section>
       <section id="settings" class="page" hidden>
         <div class="section-heading"><div><div class="eyebrow">MAAK HET PERSOONLIJK</div><h3 class="section-title">Jouw uitstraling</h3></div><span class="badge">Alleen jouw menu</span></div>
@@ -58,8 +76,30 @@
         <div class="theme-actions"><span id="theme-status" role="status" aria-live="polite">Persoonlijk thema</span><button type="button" id="theme-reset" class="quiet-button">Standaard herstellen</button></div>
         <div class="settings-divider"></div>
         <h3 class="section-title">Actieve serverconfiguratie</h3>
-        <p class="muted">Deze waarden zijn alleen leesbaar. Aanpassen gebeurt in config.lua.</p>
+        <p class="muted">De hoofdadmin kan deze waarden aanpassen onder Beheer.</p>
         <dl><dt>Overgangsduur</dt><dd data-value="duration">—</dd><dt>Instant weer toegestaan</dt><dd data-value="instant">—</dd><dt>Sneeuwsporen</dt><dd data-value="snow">—</dd><dt>Dynamic interval</dt><dd data-value="interval">—</dd><dt>Blackout beïnvloedt voertuigen</dt><dd data-value="vehicles">—</dd><dt>Persistence ingeschakeld</dt><dd data-value="persistence">—</dd></dl>
+      </section>
+      <section id="admin" class="page" hidden>
+        <div class="section-heading"><h3 class="section-title">Hoofdadminbeheer</h3><button id="admin-refresh" class="quiet-button" data-mutation>Opnieuw laden</button></div>
+        <p>Alleen MSTR_Weather-rechten. Hoofdadminrechten worden uitsluitend buiten het menu via ACE toegekend.</p>
+        <p id="admin-storage-status" role="status"></p>
+        <div id="admin-content" hidden>
+          <form id="server-settings-form" class="control-box">
+            <h3>Serverinstellingen</h3>
+            <div class="control-row"><label>Overgangsduur (seconden)<input id="setting-duration" type="number" min="0" max="300" step="any" required></label><label>Dynamic interval (minuten)<input id="setting-interval" type="number" step="any" required></label></div>
+            <div class="checks"><label><input id="setting-instant" type="checkbox"> Instant weer toegestaan</label><label><input id="setting-snow" type="checkbox"> Sneeuwsporen</label><label><input id="setting-vehicles" type="checkbox"> Blackout beïnvloedt voertuigen</label><label><input id="setting-persistence" type="checkbox"> Weer en tijd bewaren</label></div>
+            <p>Nieuwe overgangsduur geldt voor volgende overgangen. Een nieuw interval begint opnieuw te tellen. Uitschakelen van bewaren verwijdert geen bestaande opslag.</p>
+            <button type="submit" data-mutation>Serverinstellingen opslaan</button>
+          </form>
+          <form id="user-form" class="control-box">
+            <h3>Gebruikers &amp; rechten</h3>
+            <label>Opgeslagen of online persoon<select id="user-select"><option value="">Nieuwe persoon / identifier invoeren</option></select></label>
+            <div class="control-row"><label>Naam<input id="user-name" type="text" maxlength="80" required></label><label>Vaste identifier<input id="user-identifier" type="text" maxlength="64" placeholder="fivem:123456" required></label></div>
+            <div class="checks"><label><input type="checkbox" data-right="view"> Menu bekijken</label><label><input type="checkbox" data-right="weather"> Weer wijzigen</label><label><input type="checkbox" data-right="time"> Tijd wijzigen</label><label><input type="checkbox" data-right="dynamic"> Dynamic weather</label><label><input type="checkbox" data-right="blackout"> Blackout</label></div>
+            <p>Menu bekijken is vereist voor alle overige rechten. Alles uitvinken trekt toegang in, ook bij de oude admin-ACE. Hoofdadmin-ACE blijft leidend.</p>
+            <button type="submit" data-mutation>Rechten opslaan</button>
+          </form>
+        </div>
       </section>
       <footer><span id="connection" role="status">Wachten op server</span><span>ENVIRONMENT CONSOLE</span></footer>
     </div>

@@ -21,7 +21,16 @@ local function runtime(options)
     e.GetCurrentResourceName = function() return 'MSTR_Weather' end
     e.GetGameTimer = function() return (r.now + 2147483648) % 4294967296 - 2147483648 end
     e.GetHashKey = function(value) return value end
-    e.IsPlayerAceAllowed = function() return r.ace or false end
+    e.IsPlayerAceAllowed = function(player, ace)
+        if options.ace then return options.ace(player, ace) end
+        if ace == 'mstr.weather.superadmin' then return r.super or false end
+        return r.ace or false
+    end
+    e.GetPlayerIdentifiers = function(player)
+        return options.identifiers and options.identifiers[player] or { 'fivem:' .. tostring(player) }
+    end
+    e.GetPlayers = function() return { '1', '2' } end
+    e.GetPlayerName = function(player) return 'Player ' .. tostring(player) end
     local function resume(task)
         local ok, delay = coroutine.resume(task.co)
         assert(ok, delay)

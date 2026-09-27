@@ -14,6 +14,7 @@ async function callback(name) {
 }
 
 function hide() {
+  window.MSTRControls.close();
   app.hidden = true;
   clearInterval(statusTimer);
   statusTimer = null;
@@ -34,15 +35,12 @@ document.querySelectorAll('[data-page]').forEach(button => {
     button.setAttribute('aria-current', 'page');
     document.querySelectorAll('.page').forEach(page => { page.hidden = page.id !== button.dataset.page; });
     document.getElementById('page-title').textContent = button.dataset.page.charAt(0).toUpperCase() + button.dataset.page.slice(1);
+    window.MSTRControls.page(button.dataset.page);
   });
 });
 
-window.addEventListener('message', event => {
-  const message = event.data;
-  if (!message || typeof message !== 'object') return;
-  if (message.action === 'close') { hide(); return; }
-  if (message.action !== 'snapshot') return;
-  const p = message.payload;
+window.MSTRReceiveSnapshot = p => {
+  if (p && p.allowed === false) { hide(); return; }
   if (!p || p.allowed !== true || !p.state || !p.state.time || !p.state.weatherTransition || !p.settings) return;
   const s = p.state, c = p.settings;
   const values = {
@@ -60,12 +58,24 @@ window.addEventListener('message', event => {
   document.querySelectorAll('[data-value]').forEach(element => { element.textContent = values[element.dataset.value] ?? '—'; });
   const wasHidden = app.hidden;
   app.hidden = false;
+  window.MSTRControls.update(p);
+  window.MSTRIcons(s);
   receivedAt = Date.now();
   connection.textContent = '● Verbonden · serverupdate ontvangen';
   if (!statusTimer) statusTimer = setInterval(() => {
     if (Date.now() - receivedAt > 5000) connection.textContent = 'Wachten op server · gegevens mogelijk verouderd';
   }, 1000);
-  if (wasHidden) document.getElementById('close').focus();
+  if (wasHidden) {
+    document.querySelector('[data-page="dashboard"]').click();
+    document.getElementById('close').focus();
+  }
+};
+
+window.addEventListener('message', event => {
+  const message = event.data;
+  if (!message || typeof message !== 'object') return;
+  if (message.action === 'close') { hide(); return; }
+  if (message.action === 'snapshot') window.MSTRReceiveSnapshot(message.payload);
 });
 
 // The page can become ready after Lua has loaded; retry this handshake only.

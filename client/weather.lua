@@ -30,6 +30,12 @@ function ClientWeather.IsSynced()
     return synced
 end
 
+function ClientWeather.RefreshSettings()
+    if snowApplied == nil then return end
+    SetForceVehicleTrails(snowApplied and Config.Weather.EnableSnowTrails)
+    SetForcePedFootstepsTracks(snowApplied and Config.Weather.EnableSnowTrails)
+end
+
 function ClientWeather.ApplySync(payload)
     if type(payload) ~= 'table' then return false end
     local from = MSTR.Utils.NormalizeWeatherType(payload.currentWeather)

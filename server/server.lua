@@ -17,8 +17,8 @@ local function SendMessage(source, message)
     })
 end
 
-local function HasAdminPermission(source)
-    if MSTR.Permissions.HasAdminPermission(source) then
+local function HasAdminPermission(source, right)
+    if MSTR.Permissions.Can(source, right) then
         return true
     end
 
@@ -27,8 +27,10 @@ local function HasAdminPermission(source)
 end
 
 MSTR.Permissions.Initialize()
+MSTR.Admin.Initialize()
 local restoredState = MSTR.Persistence.Initialize()
 MSTR.State.Initialize(restoredState)
+MSTR.State.PublishSettings()
 MSTR.WeatherEngine.Initialize()
 MSTR.TimeEngine.Initialize()
 MSTR.Persistence.SetReady()
@@ -59,7 +61,7 @@ RegisterCommand(Config.General.DebugCommand or 'mstrdebug', function(source)
         return
     end
 
-    if not HasAdminPermission(source) then
+    if not HasAdminPermission(source, 'view') then
         return
     end
 
@@ -90,7 +92,8 @@ RegisterCommand(Config.General.WeatherCommand or 'mstrweather', function(source,
         return
     end
 
-    if not HasAdminPermission(source) then
+    local right = args[1] and string.lower(args[1]) == 'dynamic' and 'dynamic' or 'weather'
+    if not HasAdminPermission(source, right) then
         return
     end
 
@@ -151,7 +154,7 @@ RegisterCommand(Config.General.TimeCommand or 'mstrtime', function(source, args)
         return
     end
 
-    if not HasAdminPermission(source) then
+    if not HasAdminPermission(source, 'time') then
         return
     end
 
@@ -217,7 +220,7 @@ RegisterCommand(Config.General.BlackoutCommand or 'mstrblackout', function(sourc
         return
     end
 
-    if not HasAdminPermission(source) then
+    if not HasAdminPermission(source, 'blackout') then
         return
     end
 

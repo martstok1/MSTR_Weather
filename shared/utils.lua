@@ -178,6 +178,13 @@ function Utils.ValidateConfig()
     if type(permissions.Admin) ~= 'string' or permissions.Admin:match('^%s*$') then
         permissions.Admin = 'mstr.weather.admin'
     end
+    if type(permissions.SuperAdmin) ~= 'string' or permissions.SuperAdmin:match('^%s*$')
+        or permissions.SuperAdmin == permissions.Admin then
+        permissions.SuperAdmin = 'mstr.weather.superadmin'
+    end
+    if permissions.SuperAdmin == permissions.Admin then
+        error('Admin and SuperAdmin ACE must be different')
+    end
     local weather = group('Weather')
     weather.Default = Utils.NormalizeWeatherType(weather.Default) or 'CLEAR'
     number(weather, 'TransitionDuration', 30, 0, 300, false)
@@ -212,7 +219,10 @@ function Utils.ValidateConfig()
     -- absolute path. Custom nested directories must already exist.
     if type(persistence.File) ~= 'string'
         or not persistence.File:match('^data/[%w_/%.-]+%.json$')
-        or persistence.File:find('..', 1, true) then
+        or persistence.File:find('..', 1, true)
+        or persistence.File:find('/./', 1, true)
+        or persistence.File:find('//', 1, true)
+        or persistence.File:lower() == 'data/admin.json' then
         Utils.Warn('Invalid persistence path; using data/state.json')
         persistence.File = 'data/state.json'
     end

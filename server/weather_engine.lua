@@ -292,6 +292,10 @@ function WeatherEngine.GetTransitionRemainingSeconds()
     return remainingMs / 1000.0
 end
 
+function WeatherEngine.SettingsChanged()
+    ResetDynamicTimer('interval settings changed')
+end
+
 function WeatherEngine.GetNextDynamicChangeSeconds()
     if not MSTR.State.GetDynamicWeather() or not dynamicTimer then
         return nil

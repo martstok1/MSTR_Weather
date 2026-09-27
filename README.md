@@ -10,16 +10,62 @@ Current development status:
 - Phase 4 — Dynamic Weather
 - Phase 5 — Blackout + Persistence
 
-Status: Fase 6A — read-only NUI geïmplementeerd; wacht op ingame validatie.
-Start met `/mstrmenu` (of `mstrmenu` in F8). Vereist de bestaande admin-ACE.
+Status: Fase 6B — bediening, hoofdadminbeheer en weericonen gereed voor ingame tests.
+Fase 1–5, Fase 6A, persoonlijke thema's en synchronisatie met een tweede speler
+zijn door Mart goedgekeurd. Resmon bleef tijdens die tests zichtbaar op 0.
+Start met `/mstrmenu` (of `mstrmenu` in F8). Vereist toegang via ACE of Beheer.
 Dashboard, Weather, Time en Settings tonen servergegevens om de twee seconden,
 uitsluitend terwijl het menu openstaat. De klok is een servermomentopname.
 Sluit met Escape, de sluitknop of nogmaals het command.
 
-Volg [Instructions/FASE_6A_TESTPLAN.md](Instructions/FASE_6A_TESTPLAN.md).
-Volgens de werkinstructie testen we eerst read-only voordat de controls worden
-gebouwd. Logs en configureerbare branding horen bij Fase 7; geen lege Logs-tab.
-Eerdere ingame testresultaten zijn niet automatisch als geslaagd aangemerkt.
+Volg [Instructions/FASE_6B_TESTPLAN.md](Instructions/FASE_6B_TESTPLAN.md).
+De nieuwe bediening en rechten moeten eerst ingame worden goedgekeurd.
+Logs en configureerbare branding horen bij Fase 7; die fase is niet gestart.
+
+## Hoofdadmin en gedelegeerde rechten
+
+Voeg in je geladen `permissions.cfg` uitsluitend voor je eigen account toe:
+
+```cfg
+add_ace identifier.fivem:JOUW_FIVEM_ID mstr.weather.superadmin allow
+```
+
+Vervang `JOUW_FIVEM_ID` door het numerieke deel van je serveridentifier
+`fivem:123456`. Geef deze ACE niet aan een algemene admingroep. Controleer ook
+bestaande brede ACE's/inheritance: die kunnen dezelfde toestemming geven.
+De resource kan alleen de effectieve ACE controleren, niet wie jij bent.
+Voor uitleg: [Cfx identifiers](https://docs.fivem.net/docs/scripting-reference/runtimes/lua/functions/GetPlayerIdentifiers/).
+
+Alleen deze ACE opent **Beheer**: zes serverinstellingen en per persoon vinkjes
+voor menu bekijken, weer, tijd, dynamic weather en blackout. Hoofdadminrechten
+zijn nooit via het menu toe te kennen. Commands controleren dezelfde rechten.
+Gebruik in het menu `fivem:123456` of een lowercase `license:` met 40 hextekens.
+Online spelers verschijnen in de keuzelijst; offline spelers kunnen handmatig.
+Menu bekijken is vereist voor alle overige rechten. Alles uitvinken trekt
+gewone toegang in, ook bij een bestaande `mstr.weather.admin`-ACE. Meerdere
+opgeslagen identifiers van dezelfde speler worden samen beperkend toegepast.
+Een hoofdadmin behoudt via ACE alle rechten ongeacht de vinkjes.
+
+De bestaande `mstr.weather.admin` blijft gewone bediening geven, zonder Beheer,
+zolang er geen expliciete gebruikersregel voor die speler is opgeslagen.
+Rechten worden op de server bij iedere actie gecontroleerd; zichtbaarheid wordt
+binnen circa twee seconden bijgewerkt zolang het menu openstaat.
+
+Instellingen en rechten staan afzonderlijk in `data/admin.json`, met een vorige
+versie in `.bak`, ook als weer/tijd-persistence uitstaat. Opgeslagen instellingen
+hebben bij starten voorrang op de zes overeenkomstige defaults in `config.lua`.
+Een gewijzigde overgangsduur geldt vanaf de volgende overgang; een gewijzigd
+dynamic interval start een nieuwe countdown. Persistence inschakelen bewaart de
+live toestand, zonder oude state te laden. Uitschakelen verwijdert geen bestand.
+
+Beschadigde beheeropslag (of een ontbrekende primary met bestaande backup)
+blokkeert gewone toegang en beheerschrijfacties. De hoofdadmin kan nog kijken.
+Er is geen automatische backuprestore: dat zou ingetrokken rechten kunnen
+herstellen. Stop de resource, controleer de bestanden en herstel bewust een
+geldige versie; controleer daarbij oude grants. Bewaar backups buiten de resource.
+Verwijder beheeropslag niet zomaar: zonder beide bestanden gelden weer defaults
+en legacy ACE's. Maximaal 256 gebruikersregels; saves gebruiken versienummers
+om overschrijven vanuit een verouderd beheerformulier te weigeren.
 
 ## Persoonlijke menukleuren
 
@@ -34,7 +80,7 @@ ze veranderen niets voor andere admins en niets in `config.lua` of `state.json`.
 Een gewiste cache, andere computer of gewijzigde resource-origin kan de voorkeur
 resetten. Als opslag niet lukt blijft het thema deze sessie bruikbaar met melding.
 Dit is een expliciet gevraagde cosmetische uitbreiding binnen de Fase 6-tests;
-de weather/time-controls en Fase 7 branding/logging zijn nog niet gebouwd.
+de Fase 6B-bediening behoudt deze voorkeuren. Fase 7 is nog niet gebouwd.
 
 Test: alle presets, eigen lichte/donkere kleuren, foute hexcode, reset,
 sluiten/heropenen en reconnect. Controleer ook join zonder menu (transparant),
@@ -75,9 +121,13 @@ Vanuit de repository-root, met Lua 5.4:
 ```sh
 lua5.4 tests/phase1_5.lua
 lua5.4 tests/phase6.lua
+lua5.4 tests/phase6b.lua
+node tests/theme.cjs
+node tests/controls.cjs
 ```
 
 De tweede opdracht draait de 16 core-tests plus 4 NUI-security/lifecycle-tests.
+Fase 6B voegt 10 checks voor rechten, beheeropslag en actieafhandeling toe.
 De tests gebruiken nagebootste Cfx-functies, timers, JSON en schijfopslag.
 Ze controleren de logica, niet echte GTA-rendering, netwerkvertraging of writes.
 De testbestanden worden niet door `fxmanifest.lua` geladen.

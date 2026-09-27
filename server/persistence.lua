@@ -251,6 +251,17 @@ function Persistence.SetReady()
     ready = initialized
 end
 
+function Persistence.SetEnabled(enabled)
+    Config.Persistence.Enabled = enabled == true
+    if enabled then
+        initialized, ready = true, true
+        -- Enabling saves live state; it must never load an old saved clock/weather.
+        Persistence.MarkDirty('persistence enabled')
+    else
+        ready = false
+    end
+end
+
 function Persistence.Initialize()
     ready = false
     lastGoodRaw = nil
