@@ -3,6 +3,11 @@
 
 # MSTR_Weather
 
+> **v2 development branch — Phase 1:** cycle validation and clock resolution only.
+> The v1 controls below remain available. The cycle editor, scheduling, regional
+> weather and temperature effects are not active yet. See the
+> [v2 implementation instructions and phase tests](Instructions/V2_WERKINSTRUCTIE.md).
+
 **Standalone weather and time management for FiveM · v1.0.0 · Martstok**
 
 Manage weather, time and blackout from a single menu. MSTR_Weather synchronizes the environment through the server and provides separate permissions per administrator, Dutch and English menu text, and personal menu colors.
