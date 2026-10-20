@@ -3,10 +3,14 @@
 
 # MSTR_Weather
 
-> **v2 development branch — Phase 1:** cycle validation and clock resolution only.
-> The v1 controls below remain available. The cycle editor, scheduling, regional
-> weather and temperature effects are not active yet. See the
-> [v2 implementation instructions and phase tests](Instructions/V2_WERKINSTRUCTIE.md).
+> **v2 development branch — Phase 2:** persistent global cycles now follow the game
+> clock, including freeze, speed changes and reconnects. Superadmins can use the
+> temporary `/mstrcycle` command to import, activate and explicitly stop cycles.
+> See the [Phase 2 commands and test plan](Instructions/V2_FASE_2_TESTPLAN.md) and
+> [v2 implementation instructions](Instructions/V2_WERKINSTRUCTIE.md).
+> The cycle editor, regional weather and temperature effects are not available yet.
+> While a cycle is active, ordinary weather/dynamic changes are blocked until it is
+> explicitly stopped. Existing v1 controls below otherwise remain available.
 
 **Standalone weather and time management for FiveM · v1.0.0 · Martstok**
 

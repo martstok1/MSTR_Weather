@@ -1,6 +1,7 @@
 # MSTR_Weather v2 — werkinstructie
 
-Status: ontwikkeling. Alleen Fase 1 is in deze wijziging geïmplementeerd.
+Status: ontwikkeling. Fase 1 en 2 geïmplementeerd; Fase 2 wacht op ingame validatie.
+Zie [Fase 2-testplan en tijdelijke bediening](V2_FASE_2_TESTPLAN.md).
 Bronbaseline: main `7a5975d78eeac1bc6c34c45caa620994b3880c93`.
 Deze instructie is AI-agnostisch. De actuele code en expliciete gebruikersopdracht
 zijn leidend. Een oude Phase5-zip is geen bron voor herstel van huidige code.
@@ -121,7 +122,7 @@ door iedere tick opnieuw te forceren; bied uitschakeling en documenteer compatib
 
 ## Fases en acceptatie
 
-### Fase 1 — cyclusmodel en veilige basis (huidige opdracht)
+### Fase 1 — cyclusmodel en veilige basis
 
 Implementeer schema-validatie, exacte verdeling, klokresolver, manifest-load en
 gerichte tests. Geen activatie, saves, scheduler, gebieden of lege menutabs.

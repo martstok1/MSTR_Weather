@@ -240,7 +240,9 @@ function Utils.ValidateConfig()
         or persistence.File:find('..', 1, true)
         or persistence.File:find('/./', 1, true)
         or persistence.File:find('//', 1, true)
-        or persistence.File:lower() == 'data/admin.json' then
+        or persistence.File:lower() == 'data/admin.json'
+        or persistence.File:lower() == 'data/cycles.json'
+        or persistence.File:lower() == 'data/cycle_import.json' then
         Utils.Warn('Invalid persistence path; using data/state.json')
         persistence.File = 'data/state.json'
     end
