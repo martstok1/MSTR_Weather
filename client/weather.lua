@@ -42,8 +42,12 @@ function ClientWeather.ApplySync(payload)
     local target = MSTR.Utils.NormalizeWeatherType(payload.targetWeather)
     local duration = payload.transitionDuration
     local elapsed = payload.transitionElapsed
+    local cycle = payload.cycle == true
+    local rate = 1
+    if cycle then rate = payload.clockRate end
     if not from or not target
-        or not MSTR.Utils.IsValidNumber(duration, 0, 300)
+        or not MSTR.Utils.IsValidNumber(duration, 0, cycle and 86400 or 300)
+        or not MSTR.Utils.IsValidNumber(rate, 0, 100)
         or not MSTR.Utils.IsValidNumber(elapsed, 0, duration) then
         MSTR.Utils.Warn('Rejected invalid client weather sync payload')
         return false
@@ -72,9 +76,12 @@ function ClientWeather.ApplySync(payload)
     end
     ApplyProgress(elapsed / duration)
 
+    -- Frozen cycles retain their blend without a polling thread.
+    if rate == 0 then return true end
+
     CreateThread(function()
         while serial == applySerial do
-            local seconds = elapsed + MSTR.Utils.ElapsedMs(GetGameTimer(), anchor) / 1000.0
+            local seconds = elapsed + MSTR.Utils.ElapsedMs(GetGameTimer(), anchor) / 1000.0 * rate
             if seconds >= duration then
                 ApplyStableWeather(target)
                 return

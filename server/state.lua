@@ -122,6 +122,11 @@ function State.SetDynamicWeather(enabled)
 end
 
 function State.GetWeatherTransition()
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then
+        local payload, resolved = MSTR.Cycles.GetPayload()
+        return { active=resolved.transitioning, target=resolved.weather,
+            duration=payload.transitionDuration, unit='gameSeconds' }
+    end
     return {
         active = GlobalState[KEYS.WeatherTransitioning] == true,
         target = GlobalState[KEYS.WeatherTarget] or '',
@@ -245,6 +250,7 @@ function State.GetSnapshot()
     end
     return {
         weather = State.GetWeather(),
+        cycle = MSTR.Cycles and MSTR.Cycles.GetStatus() or nil,
         dynamicWeather = State.GetDynamicWeather(),
         weatherTransition = State.GetWeatherTransition(),
         blackout = State.GetBlackout(),

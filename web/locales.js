@@ -3,6 +3,7 @@
 // Keep original text nodes so switching languages never rebuilds forms or loses drafts.
 (() => {
   const entries = [
+    ['Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.', 'Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.', 'A weather cycle is active. Ask the superadmin to stop it with /mstrcycle first.'],
     ['Environment console', 'Omgevingsbeheer', 'Environment console'],
     ['ENVIRONMENT CONSOLE', 'OMGEVINGSBEHEER', 'ENVIRONMENT CONSOLE'],
     ['ADMIN CONSOLE', 'BEHEERPANEEL', 'ADMIN CONSOLE'],

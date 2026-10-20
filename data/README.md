@@ -1,5 +1,15 @@
 # Runtime storage
 
+## V2 cycles
+
+`cycles.json` and `cycles.json.bak` store cycle definitions, revision and active ID.
+Back them up outside the resource before updates. Cycle storage is independent of
+environment persistence. `cycle_import.json` is a temporary manual import source;
+it never activates automatically. These runtime JSON files are ignored by Git.
+Corrupted cycle storage is not automatically restored from backup: repair it
+deliberately while the resource is stopped. See the
+[Phase 2 test plan](../Instructions/V2_FASE_2_TESTPLAN.md).
+
 This folder must remain present and writable by FXServer.
 
 `state.json`, `state.json.bak`, `admin.json` and `admin.json.bak` are created automatically during runtime and are ignored by Git. Do not share these files with other servers: admin storage contains player identifiers and permissions.

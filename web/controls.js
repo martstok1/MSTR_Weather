@@ -4,6 +4,7 @@
   let capabilities = {}, panel = null, busy = false, initialized = false, generation = 0;
   let selectedUsers = new Map();
   const messages = {
+    cycle_active: 'Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.',
     forbidden: 'Geen toestemming voor deze actie.', invalid: 'Ongeldige invoer.',
     transitioning: 'Er loopt al een overgang. Wacht of kies expliciet Direct.',
     instant_disabled: 'Direct weer wijzigen is uitgeschakeld door de hoofdadmin.',

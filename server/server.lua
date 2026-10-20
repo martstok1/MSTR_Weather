@@ -34,6 +34,7 @@ MSTR.State.PublishSettings()
 MSTR.WeatherEngine.Initialize()
 MSTR.TimeEngine.Initialize()
 MSTR.Persistence.SetReady()
+MSTR.Cycles.Initialize()
 MSTR.Logging.Record('startup', nil, MSTR.State.GetSnapshot(), { origin = 'startup' })
 
 local syncRequestTimes = {}
@@ -104,6 +105,13 @@ RegisterAdminCommand(Config.General.WeatherCommand, function(source, args)
 
     local right = args[1] and string.lower(args[1]) == 'dynamic' and 'dynamic' or 'weather'
     if not HasAdminPermission(source, right) then
+        return
+    end
+
+    if MSTR.Cycles.IsActive() then
+        SendMessage(source, Config.General.Locale == 'nl'
+            and 'Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.'
+            or 'A weather cycle is active. Ask the superadmin to stop it with /mstrcycle first.')
         return
     end
 

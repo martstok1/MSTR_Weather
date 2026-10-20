@@ -143,6 +143,10 @@ function WeatherEngine.Initialize()
 end
 
 function WeatherEngine.IsTransitioning()
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then
+        local _, result = MSTR.Cycles.GetPayload()
+        return result.transitioning
+    end
     return activeTransition ~= nil
 end
 
@@ -177,6 +181,7 @@ function WeatherEngine.GetNextWeatherType(currentWeather)
 end
 
 function WeatherEngine.SetWeather(weatherType, instant, actor)
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then return false, 'cycle_active' end
     local targetWeather = MSTR.Utils.NormalizeWeatherType(weatherType)
 
     if not targetWeather then
@@ -258,6 +263,7 @@ function WeatherEngine.SetWeather(weatherType, instant, actor)
 end
 
 function WeatherEngine.SetDynamicWeather(enabled, actor)
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then return false, 'cycle_active' end
     if not MSTR.Utils.IsValidBoolean(enabled) then
         return false
     end
@@ -286,6 +292,11 @@ function WeatherEngine.SetDynamicWeather(enabled, actor)
 end
 
 function WeatherEngine.GetTransitionRemainingSeconds()
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then
+        local payload, result = MSTR.Cycles.GetPayload()
+        if not result.transitioning then return 0 end
+        return payload.clockRate > 0 and (payload.transitionDuration - payload.transitionElapsed) / payload.clockRate or 0
+    end
     if not activeTransition then
         return 0
     end
@@ -325,6 +336,12 @@ function WeatherEngine.SyncPlayer(source)
         return
     end
 
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then
+        local payload = MSTR.Cycles.GetPayload()
+        TriggerClientEvent('mstr_weather:client:weatherSync', playerSource, payload)
+        return
+    end
+
     if activeTransition then
         local remaining = WeatherEngine.GetTransitionRemainingSeconds()
 
@@ -352,6 +369,7 @@ function WeatherEngine.SyncPlayer(source)
 end
 
 function WeatherEngine.RunDynamicCycle()
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then return false, 'cycle_active' end
     if not MSTR.State.GetDynamicWeather() then
         return false, 'disabled'
     end
@@ -388,6 +406,7 @@ function WeatherEngine.RunDynamicCycle()
 end
 
 function WeatherEngine.StartScheduler()
+    if MSTR.Cycles and MSTR.Cycles.IsActive() then return end
     if schedulerStarted or not MSTR.State.GetDynamicWeather() then
         return
     end
@@ -422,4 +441,34 @@ function WeatherEngine.StartScheduler()
     end)
 
     MSTR.Utils.Debug('Dynamic weather scheduler started')
+end
+
+-- Cycles reuse this engine and the existing client weather blend.
+function WeatherEngine.SuspendAutomaticWeather()
+    local wasDynamic = MSTR.State.GetDynamicWeather()
+    schedulerGeneration = schedulerGeneration + 1
+    schedulerStarted, dynamicTimer = false, nil
+    transitionSerial = transitionSerial + 1
+    activeTransition = nil
+    MSTR.State.SetDynamicWeather(false)
+    if wasDynamic then MSTR.Persistence.MarkDirty('cycle owns weather') end
+end
+
+function WeatherEngine.ApplyCycle(payload, result)
+    local previous = MSTR.State.GetWeather()
+    MSTR.State.SetWeather(result.weather)
+    MSTR.State.SetWeatherTransition(false, nil, 0)
+    TriggerClientEvent('mstr_weather:client:weatherSync', -1, payload)
+    if previous ~= result.weather then
+        MSTR.Persistence.MarkDirty('cycle weather changed')
+        MSTR.Logging.Record('cycle_weather', previous, result.weather, {origin='transition'})
+    end
+end
+
+function WeatherEngine.EndCycle()
+    -- Explicit stop settles on the accepted target and stays in static mode.
+    local weather = MSTR.State.GetWeather()
+    BroadcastWeather(weather, weather, 0)
+    MSTR.State.SetWeatherTransition(false, nil, 0)
+    MSTR.Persistence.MarkDirty('cycle stopped')
 end

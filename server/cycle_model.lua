@@ -81,7 +81,7 @@ function Model.Resolve(handle, gameSeconds)
             local progress = block.transition == 0 and 1 or math.min(1, elapsed / block.transition)
             return { index=index, weather=block.weather, previousWeather=previous.weather,
                 elapsedGameSeconds=elapsed, remainingGameSeconds=block.duration-elapsed,
-                transitionProgress=progress,
+                transitionProgress=progress, transitionGameSeconds=block.transition,
                 transitioning=progress < 1 and previous.weather ~= block.weather,
                 startGameSeconds=(cycle.start+block.start) % DAY,
                 endGameSeconds=(cycle.start+block.start+block.duration) % DAY }
