@@ -14,13 +14,14 @@ game 'gta5'
 
 author 'Martstok'
 description 'Modern Weather and Time Management for FiveM'
-version '2.0.0-dev.2'
+version '2.0.0-rc.1'
 
 shared_scripts {
     'config.lua',
     'shared/constants.lua',
     'shared/utils.lua',
-    'shared/locales.lua'
+    'shared/locales.lua',
+    'shared/geometry.lua'
 }
 
 server_scripts {
@@ -34,6 +35,8 @@ server_scripts {
     'server/time_engine.lua',
     'server/admin.lua',
     'server/cycles.lua',
+    'server/v2_storage.lua',
+    'server/regions.lua',
     'server/nui.lua',
     'server/server.lua'
 }
@@ -41,6 +44,8 @@ server_scripts {
 client_scripts {
     'client/weather.lua',
     'client/time.lua',
+    'client/regions.lua',
+    'client/temperature.lua',
     'client/blackout.lua',
     'client/settings.lua',
     'client/nui.lua',
@@ -61,5 +66,6 @@ files {
     'images/*.webp',
     'web/icons.js',
     'web/controls.js',
-    'web/app.js'
+    'web/app.js',
+    'web/v2.js', 'web/v2.css'
 }

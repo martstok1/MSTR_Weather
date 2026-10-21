@@ -3,16 +3,13 @@
 
 # MSTR_Weather
 
-> **v2 development branch — Phase 2:** persistent global cycles now follow the game
-> clock, including freeze, speed changes and reconnects. Superadmins can use the
-> temporary `/mstrcycle` command to import, activate and explicitly stop cycles.
-> See the [Phase 2 commands and test plan](Instructions/V2_FASE_2_TESTPLAN.md) and
-> [v2 implementation instructions](Instructions/V2_WERKINSTRUCTIE.md).
-> The cycle editor, regional weather and temperature effects are not available yet.
-> While a cycle is active, ordinary weather/dynamic changes are blocked until it is
-> explicitly stopped. Existing v1 controls below otherwise remain available.
+> **V2 test build — 2.0.0-rc.1:** the existing V1 menu now includes Weather cycles,
+> Regions and Temperature. Open `/mstrmenu` using your existing superadmin account.
+> No separate menu, cycle commands or JSON imports are needed.
+> See the [V2 usage and installation guide (NL)](Instructions/V2_GEBRUIK.md) and
+> [changelog](CHANGELOG.md). Owner testing is pending; this is not the final 2.0.0 release.
 
-**Standalone weather and time management for FiveM · v1.0.0 · Martstok**
+**Standalone weather and time management for FiveM · 2.0.0-rc.1 · Martstok**
 
 Manage weather, time and blackout from a single menu. MSTR_Weather synchronizes the environment through the server and provides separate permissions per administrator, Dutch and English menu text, and personal menu colors.
 
@@ -29,6 +26,30 @@ Manage weather, time and blackout from a single menu. MSTR_Weather synchronizes 
 - Server-side permission checks, input validation and request rate limits.
 
 No ESX, QBCore, ox_lib, database or external web service is required. The interface is included locally; no build step is needed.
+
+## V2 extensions
+
+The original menu, branding, colors and permissions remain the foundation.
+Three additional sections require the existing `mstr.weather.superadmin` ACE:
+
+- **Weather cycles:** named cycles with 1–24 ordered blocks, weather, percentage of
+  the game day, transition duration in game seconds, temperature and timeline.
+  Percentages total exactly 100%. Save, duplicate, activate, stop and delete in-menu.
+- **Regions:** up to 32 polygonal areas with static, weighted or cycle weather.
+  Draw polygons/rectangles on an original schematic map, drag vertices/areas, edit
+  exact coordinates or insert your player position. No third-party map assets.
+- **Temperature:** global defaults, per-region/per-block temperatures and optional
+  heat haze/frost edges. Visual effects only; no health, clothing or thirst changes.
+
+Cycles follow the existing server clock, including freeze, time scale and time jumps.
+Region boundary transitions use real seconds and continue while the clock is frozen.
+The clock and blackout remain global. The existing Weather section controls the global
+fallback; regional overrides remain active. Manual global weather selection disables
+weighted global weather. Stopping an active global cycle requires superadmin confirmation.
+
+Heat and cold effects default to off. Heat yields to other timecycle effects and depends
+on available game-build variables; visibility and compatibility need in-game validation.
+The schematic map is not a street map. Use coordinates/player position for precise borders.
 
 ## Installation
 
@@ -82,6 +103,9 @@ Open the menu with `/mstrmenu`. Close it with Escape, the close button, or the s
 | Settings | Customize personal menu colors |
 | Management | Shared settings and user permissions; superadmin only |
 | Logs | Action history; superadmin only |
+| Weather cycles | Cycle editor and global activation; superadmin only |
+| Regions | Regional weather and schematic map editor; superadmin only |
+| Temperature | Shared visual temperature effects; superadmin only |
 
 While the menu is open, it receives current server data approximately every two seconds. The displayed clock is a snapshot; the in-game clock continues locally based on server settings.
 
@@ -159,6 +183,10 @@ Commands and menu actions share a limit of one request per player every 500 ms. 
 | `data/state.json.bak` | Previous valid environment state |
 | `data/admin.json` | Shared admin settings and user permissions |
 | `data/admin.json.bak` | Previous admin state |
+| `data/cycles.json` | Cycle definitions, revision and global active cycle |
+| `data/cycles.json.bak` | Previous valid cycle configuration |
+| `data/regions.json` | Region definitions, effect settings and revision |
+| `data/regions.json.bak` | Previous valid region/effect configuration |
 
 These files are created during runtime and should not be committed to Git. Preserve them when updating:
 
@@ -168,11 +196,18 @@ These files are created during runtime and should not be committed to Git. Prese
 4. Keep or restore the runtime files in `data/`.
 5. Start the resource again.
 
-Writes are batched and read back for verification. On a normal stop, the current environment is saved. A crash may lose changes made since the last successful save. Seconds, transition progress and elapsed offline time are not stored. During a transition, the target weather is saved and applied immediately after restart.
+Environment writes are batched and read back for verification. On a normal stop, the current environment is saved. A crash may lose changes made since the last successful save. Seconds, transition progress and elapsed offline time are not stored. During a transition, the target weather is saved and applied immediately after restart.
 
 If the environment state is invalid, the resource tries the backup and then the defaults. **Admin permissions intentionally do not use automatic backup restore** because an old backup could restore revoked permissions. Corrupted admin storage blocks regular access and admin writes. The superadmin can still inspect the system. Stop the resource, inspect the primary and backup files, and deliberately restore a valid version.
 
 Do not simply delete `admin.json` and its backup: if both files are missing, defaults and regular ACE permissions apply again. See [data/README.md](data/README.md).
+
+V2 cycle and region configuration writes are immediate and verified before publication.
+Corrupt V2 storage locks editing without automatically restoring older activation.
+Preserve cycle and region files together to retain valid references. Runtime configuration
+is stored even with ordinary environment persistence disabled. Schema-1 cycles remain
+readable at 20 °C; editing saves schema 2 with explicit block temperatures. Weighted
+regions restart from their configured weather, not their last randomly chosen weather.
 
 ## Logging
 
@@ -198,7 +233,12 @@ Version **1.0.0** was finalized at the owner's request after approved in-game ch
 
 **Release TODO:** the full multiplayer final verification for this exact release has been postponed: synchronization with two real clients, late join during a transition and simultaneous control by two admins. These checks have not been marked as passed. No fixed CPU or resmon value is guaranteed.
 
-Development tests and phase documentation have been removed from the product version; earlier versions remain available in Git history. This version does not provide public developer exports, zones, per-routing-bucket weather or real-world weather.
+V2 is currently **2.0.0-rc.1**, prepared for the owner to test as one integrated build.
+No new functional test suites, browser tests, in-game checks or performance measurements
+were run for this RC at the owner's request. Previous phase test results apply only to
+those earlier commits. Development tests are excluded from the runtime manifest.
+Final release approval, real multiplayer validation and measured performance remain open.
+There are no public developer exports, routing-bucket weather or real-world weather APIs.
 
 ## Author
 

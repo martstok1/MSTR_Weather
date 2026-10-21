@@ -4,7 +4,7 @@
   let capabilities = {}, panel = null, busy = false, initialized = false, generation = 0;
   let selectedUsers = new Map();
   const messages = {
-    cycle_active: 'Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.',
+    cycle_active: 'Er is een weercyclus actief. De hoofdadmin kan deze stoppen in Weercycli.',
     forbidden: 'Geen toestemming voor deze actie.', invalid: 'Ongeldige invoer.',
     transitioning: 'Er loopt al een overgang. Wacht of kies expliciet Direct.',
     instant_disabled: 'Direct weer wijzigen is uitgeschakeld door de hoofdadmin.',
@@ -15,6 +15,13 @@
     closed: 'Menu gesloten.', busy: 'Er wordt al een verzoek verwerkt.'
   };
   function lockButtons() {
+    document.querySelectorAll('.v2-page input, .v2-page select, .v2-page button').forEach(control => {
+      if (busy && !control.hasAttribute('data-busy-disabled')) {
+        control.dataset.busyDisabled = String(control.disabled); control.disabled = true;
+      } else if (!busy && control.hasAttribute('data-busy-disabled')) {
+        control.disabled = control.dataset.busyDisabled === 'true'; delete control.dataset.busyDisabled;
+      }
+    });
     document.querySelectorAll('[data-mutation]').forEach(button => { button.disabled = busy; });
     if (!panel || panel.locked) {
       el('server-settings-form').querySelector('button[type="submit"]').disabled = true;
@@ -55,6 +62,11 @@
   }
   async function send(action, payload = {}) {
     if (busy) return;
+    if ((action === 'weather' || action === 'dynamic') && window.MSTRV2?.activeCycle() && !payload.stopCycle) {
+      if (!capabilities.manage) { el('action-status').textContent = window.MSTRV2.text('cycleBlocked'); return; }
+      if (!await window.MSTRV2.confirm(window.MSTRV2.text('stopForManual'))) return;
+      payload.stopCycle = true; payload.cycleRevision = window.MSTRV2.cycleRevision();
+    }
     busy = true; lockButtons();
     const current = generation;
     el('action-status').textContent = 'Verzoek wordt gecontroleerd…';
@@ -69,7 +81,10 @@
       if (generation !== current || el('app').hidden) return;
       if (result.panel && capabilities.manage) renderPanel(result.panel);
       if (result.logs && capabilities.manage) window.MSTRLogs.render(result.logs, Boolean(payload.before));
+      if (result.v2 && capabilities.manage) window.MSTRV2.receive(result.v2);
       el('action-status').textContent = result.ok ? (action === 'panel' ? 'Beheer geladen.' : 'Door de server bevestigd.') : (messages[result.reason] || 'Actie niet uitgevoerd.');
+      if (!result.ok && window.MSTRV2) el('action-status').textContent = window.MSTRV2.error(result.reason) || el('action-status').textContent;
+      return result;
     } catch {
       if (generation === current) el('action-status').textContent = messages.timeout;
     } finally {
@@ -105,6 +120,7 @@
   window.MSTRControls = {
     update(snapshot) {
       capabilities = snapshot.permissions || {};
+      window.MSTRV2?.update(snapshot);
       document.querySelectorAll('[data-permission]').forEach(element => { element.hidden = !capabilities[element.dataset.permission]; });
       if (!capabilities.manage) {
         window.MSTRLogs?.reset();
@@ -128,11 +144,12 @@
       lockButtons();
     },
     send,
-    page(name) { if (name === 'admin' && capabilities.manage && !panel) send('panel'); if (name === 'logs' && capabilities.manage) send('logs'); },
+    page(name) { window.MSTRV2?.page(name); if (name === 'admin' && capabilities.manage && !panel) send('panel'); if (name === 'logs' && capabilities.manage) send('logs'); },
     close() {
       generation++; busy = false; initialized = false; capabilities = {}; panel = null;
       selectedUsers.clear(); el('admin-content').hidden = true;
       window.MSTRLogs?.reset();
+      window.MSTRV2?.close();
       el('user-select').replaceChildren(new Option('Nieuwe persoon / identifier invoeren', ''));
       fillUser(); el('action-status').textContent = '';
       document.querySelectorAll('[data-permission]').forEach(element => { element.hidden = true; });

@@ -84,6 +84,7 @@ end
 function TimeEngine.BroadcastSync()
     TriggerClientEvent('mstr_weather:client:timeSync', -1, TimeEngine.GetSyncPayload())
     if MSTR.Cycles then MSTR.Cycles.Refresh(true) end
+    if MSTR.Regions then MSTR.Regions.Refresh(true) end
 end
 
 function TimeEngine.SetTime(hour, minute, actor)

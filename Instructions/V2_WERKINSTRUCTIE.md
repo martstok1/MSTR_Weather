@@ -1,7 +1,13 @@
 # MSTR_Weather v2 — werkinstructie
 
-Status: ontwikkeling. Fase 1 en 2 geïmplementeerd; Fase 2 wacht op ingame validatie.
-Zie [Fase 2-testplan en tijdelijke bediening](V2_FASE_2_TESTPLAN.md).
+Status: **2.0.0-rc.1**, geïntegreerde testversie. Fase 3–6-functionaliteit is toegevoegd
+in het bestaande V1-menu. Fase 7/8-metingen, ingame acceptatie en releasegoedkeuring
+staan open voor de eigenaar. Zie [V2-gebruik en installatie](V2_GEBRUIK.md).
+
+Opdrachtwijziging van de eigenaar: alle resterende functionaliteit in één keer
+opleveren, geen afzonderlijke fasestops en geen functionele tests door de ontwikkelaar.
+De eigenaar test de complete versie en meldt problemen. De tijdelijke commando's
+van Fase 2 zijn vervangen door menubediening; er komt geen apart V2-menu.
 Bronbaseline: main `7a5975d78eeac1bc6c34c45caa620994b3880c93`.
 Deze instructie is AI-agnostisch. De actuele code en expliciete gebruikersopdracht
 zijn leidend. Een oude Phase5-zip is geen bron voor herstel van huidige code.
@@ -34,8 +40,10 @@ Interne bestanden laden via manifest, geen lokale require-architectuur.
 Geen dependencies toevoegen. Nieuwe natives vooraf met officiële Cfx-documentatie
 verifiëren. Geen backdrop-filter in de NUI.
 
-Na iedere fase: self-review, gerichte tests, concrete ingame stappen en STOP.
-Ga pas verder na toestemming. Niet-uitgevoerde tests nooit goedkeuren.
+Voor deze gezamenlijke oplevering: code afronden, integratie nalopen en concrete
+gebruiksstappen leveren. Tests en metingen worden door de eigenaar uitgevoerd.
+Niet-uitgevoerde tests nooit goedkeuren. De eerdere fasestops zijn voor deze opdracht
+vervallen; definitief releasen volgt pas na eigenaarakkoord.
 Ontwikkeltests mogen op de v2-branch bestaan en horen niet in het runtime-manifest.
 Versie blijft een dev-versie tot de eindcontrole en expliciete releasegoedkeuring.
 
@@ -45,7 +53,8 @@ Een cyclus volgt de canonieke spelklok, niet systeemtijd of een eigen stopwatch.
 Een dag is 86400 spelseconden. Percentage is duur, niet kans.
 Ondersteun 0,01% precisie; reken intern met gehele basispunten, totaal 10000.
 Een cyclus heeft 1–24 blokken, een naam van maximaal 80 UTF-8 bytes en startMinute
-0–1439. Onderliggende cyclusdefinitie heeft schema version=1.
+0–1439. Oude definities met schema version=1 blijven leesbaar (20 °C). De editor
+schrijft version=2 met temperature per blok. De container voor cycli blijft version=1.
 
 Blokvelden: weather, percent en transitionGameSeconds. Overgang ligt aan het
 begin van het blok, telt mee in het percentage en mag niet langer zijn dan het
@@ -197,4 +206,5 @@ Ingame op de ontwikkelbranch:
 4. Wijzig weer geleidelijk/direct, tijd, freeze en blackout; controleer resultaat.
 5. Herstart normaal en controleer opgeslagen instellingen en menu opnieuw.
 
-Een nieuwe Weercycli-tab is in Fase 1 bewust nog niet aanwezig. STOP na rapportage.
+Bovenstaande Fase 1-instructies beschrijven de historische oplevering. Voor de
+huidige geïntegreerde versie geldt V2_GEBRUIK.md; de Weercycli-tab is nu aanwezig.
