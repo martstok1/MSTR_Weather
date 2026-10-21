@@ -10,7 +10,7 @@ Alleen de Lua- en JavaScript-syntax is gecontroleerd, zonder de scripts uit te v
 
 1. Stop MSTR_Weather normaal en bewaar `config.lua`, eigen afbeeldingen en de hele
    `data/`-map buiten de resource als backup.
-2. Gebruik de volledige branch `feature/v2-phase2-cycles` uit PR #11. Kopieer alle
+2. Gebruik de volledige branch `feature/v2-phase2-cycles`. Kopieer alle
    gewijzigde én nieuwe bestanden, inclusief het manifest, shared-, server-, client-
    en webbestanden. De oude Phase5-zip is niet de bron voor V2.
 3. Behoud je eigen config en runtime-JSON-bestanden. Er is geen database of nieuwe
