@@ -5,6 +5,11 @@
   status.setAttribute('data-no-localize', '');
   let nextBefore = null, rows = [], enabled = true, limit = 200, language = null;
   const names = {
+    cycle_import: ['Cyclus opgeslagen', 'Cycle saved'], cycle_activate: ['Cyclus geactiveerd', 'Cycle activated'],
+    cycle_stop: ['Cyclus gestopt', 'Cycle stopped'], cycle_delete: ['Cyclus verwijderd', 'Cycle deleted'],
+    cycle_weather: ['Cyclusweer', 'Cycle weather'], region_save: ['Gebied opgeslagen', 'Region saved'],
+    region_delete: ['Gebied verwijderd', 'Region deleted'], region_effects: ['Temperatuureffecten', 'Temperature effects'],
+    revision: ['Revisie', 'Revision'], id: ['Code', 'ID'], cycle: ['Cyclus', 'Cycle'], locked: ['Geblokkeerd', 'Locked'],
     weather: ['Weer', 'Weather'], time: ['Tijd', 'Time'], freeze: ['Bevriezen', 'Freeze'],
     scale: ['Tijdsnelheid', 'Time speed'], dynamic: ['Dynamisch weer', 'Dynamic weather'],
     blackout: ['Stroomuitval', 'Blackout'], settings: ['Instellingen', 'Settings'], user: ['Gebruiker', 'User'],

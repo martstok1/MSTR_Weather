@@ -85,7 +85,8 @@ function Cycles.GetPayload()
     return { cycle=true, currentWeather=result.previousWeather, targetWeather=result.weather,
         transitionDuration=result.transitionGameSeconds,
         transitionElapsed=math.min(result.elapsedGameSeconds,result.transitionGameSeconds),
-        clockRate=clock.frozen and 0 or clock.scale },result
+        clockRate=clock.frozen and 0 or clock.scale, temperature=result.temperature,
+        previousTemperature=result.previousTemperature,targetTemperature=result.targetTemperature },result
 end
 function Cycles.Refresh(force)
     if not Cycles.IsActive() then return end
@@ -134,10 +135,10 @@ function Cycles.Initialize()
     ApplyMode(false)
 end
 
--- One entrypoint for temporary command and future NUI. Never trust actor/source in data.
-function Cycles.Request(player, action, revision, id, raw)
+-- Internal service; NUI supplies its server-captured actor after the shared rate gate.
+function Cycles.Request(player, action, revision, id, raw, fromNui)
     if not MSTR.Permissions.IsSuperAdmin(player) then return false,'forbidden' end
-    if not MSTR.Requests.Allow(player) then return false,'rate' end
+    if not fromNui and not MSTR.Requests.Allow(player) then return false,'rate' end
     if action=='list' then return true,Copy(document),locked end
     if locked then return false,'locked' end
     if not MSTR.Utils.IsValidInteger(revision,0,2147483645) or revision~=document.revision then
@@ -146,13 +147,15 @@ function Cycles.Request(player, action, revision, id, raw)
     local nextDocument=Copy(document)
     if action=='import' then
         if not Id(id) then return false,'invalid' end
-        local definition=Decode(raw or LoadResourceFile(GetCurrentResourceName(),'data/cycle_import.json'))
+        local definition=Decode(raw)
         if not definition or not MSTR.CycleModel.Compile(definition) then return false,'invalid' end
+        for _,block in ipairs(definition.blocks) do block.weather=MSTR.Utils.NormalizeWeatherType(block.weather) end
         nextDocument.cycles[id]=definition
     elseif action=='activate' then
         if not Id(id) or not nextDocument.cycles[id] then return false,'invalid' end
         nextDocument.active=id
     elseif action=='delete' then
+        if MSTR.Regions and MSTR.Regions.UsesCycle(id) then return false,'in_use' end
         if not Id(id) or not nextDocument.cycles[id] then return false,'invalid' end
         if nextDocument.active==id then return false,'in_use' end
         nextDocument.cycles[id]=nil
@@ -167,34 +170,13 @@ function Cycles.Request(player, action, revision, id, raw)
     if not ok then return false,reason end
     ApplyMode(wasActive)
     MSTR.Logging.Record('cycle_'..action,previous,{ revision=document.revision, active=document.active, id=id },
-        {player=player,origin='command'})
+        {player=player,origin='nui'})
+    if MSTR.Regions then MSTR.Regions.Refresh(true) end
     return true,Cycles.GetStatus()
 end
 
--- Deliberately no network mutation event in this phase. Import is a fixed local file.
-RegisterCommand('mstrcycle',function(player,args)
-    if not MSTR.Utils.IsValidInteger(player,1,2147483647) then return end
-    local action=args[1] or 'list'
-    local raw
-    local ok,result,isLocked=Cycles.Request(player,action,tonumber(args[3]),args[2],raw)
-    local nl=Config.General.Locale=='nl'
-    local reasons={
-        forbidden={'Geen hoofdadminrechten.','Superadmin permission required.'},
-        rate={'Wacht even tussen verzoeken.','Wait between requests.'},
-        locked={'Cyclusopslag beschadigd; herstel het bestand met de resource gestopt.','Cycle storage damaged; repair while resource is stopped.'},
-        revision={'Verouderde revisie. Gebruik /mstrcycle list.','Stale revision. Use /mstrcycle list.'},
-        invalid={'Ongeldige invoer of importbestand. Zie het Fase 2-testplan.','Invalid input or import file. See the Phase 2 test plan.'},
-        storage={'Opslaan mislukt. Actieve toestand behouden.','Save failed. Live state retained.'},
-        in_use={'Stop de cyclus eerst.','Stop the cycle first.'},
-        confirm={'Gebruik /mstrcycle stop confirm <revisie>.','Use /mstrcycle stop confirm <revision>.'}
-    }
-    local message
-    if ok then
-        message=(nl and 'Revisie: ' or 'Revision: ')..result.revision..' | '..(nl and 'Actief: ' or 'Active: ')..tostring(result.active)
-        if action=='list' then
-            local ids={};for key in pairs(result.cycles) do ids[#ids+1]=key end;table.sort(ids)
-            message=message..' | '..table.concat(ids,', ')..(isLocked and ' | LOCKED' or '')
-        end
-    else local pair=reasons[result] or reasons.invalid;message=pair[nl and 1 or 2] end
-    TriggerClientEvent('chat:addMessage',player,{args={'MSTR_Weather',message}})
-end,false)
+function Cycles.Resolve(id)
+    if not handles[id] then return nil end
+    return MSTR.CycleModel.Resolve(handles[id],MSTR.TimeEngine.GetCurrentMinutes()*60)
+end
+function Cycles.Exists(id) return handles[id]~=nil end

@@ -24,7 +24,7 @@ function Model.Compile(input)
     if not fields(input, { version=true, name=true, startMinute=true, blocks=true }) then
         return nil, 'schema'
     end
-    if input.version ~= 1 then return nil, 'version' end
+    if input.version ~= 1 and input.version ~= 2 then return nil, 'version' end
     if type(input.name) ~= 'string' or #input.name > 80 or not input.name:find('%S')
         or input.name:find('%c') then return nil, 'name' end
     if not MSTR.Utils.IsValidInteger(input.startMinute, 0, 1439) then
@@ -42,10 +42,11 @@ function Model.Compile(input)
     local total, blocks = 0, {}
     for i = 1, count do
         local block = input.blocks[i]
-        if not fields(block, { weather=true, percent=true, transitionGameSeconds=true }) then
+        if not fields(block, { weather=true, percent=true, transitionGameSeconds=true, temperature=input.version==2 }) then
             return nil, 'block', i
         end
         local weather = MSTR.Utils.NormalizeWeatherType(block.weather)
+        if input.version==2 and not number(block.temperature,-50,60) then return nil,'temperature',i end
         if not weather then return nil, 'weather', i end
         if not number(block.percent, 0.01, 100) then return nil, 'percent', i end
         local units = math.floor(block.percent * 100 + 0.5)
@@ -57,7 +58,7 @@ function Model.Compile(input)
             return nil, 'transition', i
         end
         blocks[i] = { weather=weather, start=total * DAY / 10000,
-            duration=duration, transition=block.transitionGameSeconds }
+            duration=duration, transition=block.transitionGameSeconds, temperature=input.version==2 and block.temperature or 20 }
         total = total + units
     end
     if total ~= 10000 then return nil, 'total' end
@@ -80,6 +81,8 @@ function Model.Resolve(handle, gameSeconds)
             local previous = cycle.blocks[index == 1 and #cycle.blocks or index - 1]
             local progress = block.transition == 0 and 1 or math.min(1, elapsed / block.transition)
             return { index=index, weather=block.weather, previousWeather=previous.weather,
+                temperature=previous.temperature+(block.temperature-previous.temperature)*progress,
+                previousTemperature=previous.temperature, targetTemperature=block.temperature,
                 elapsedGameSeconds=elapsed, remainingGameSeconds=block.duration-elapsed,
                 transitionProgress=progress, transitionGameSeconds=block.transition,
                 transitioning=progress < 1 and previous.weather ~= block.weather,

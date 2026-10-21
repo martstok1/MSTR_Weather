@@ -1,20 +1,32 @@
 # Runtime storage
 
-## V2 cycles
+## V2 configuration
 
-`cycles.json` and `cycles.json.bak` store cycle definitions, revision and active ID.
-Back them up outside the resource before updates. Cycle storage is independent of
-environment persistence. `cycle_import.json` is a temporary manual import source;
-it never activates automatically. These runtime JSON files are ignored by Git.
-Corrupted cycle storage is not automatically restored from backup: repair it
-deliberately while the resource is stopped. See the
-[Phase 2 test plan](../Instructions/V2_FASE_2_TESTPLAN.md).
+`cycles.json` stores cycle definitions, revision and global active ID.
+`regions.json` stores regional weather, effect settings and revision. Both have a
+`.bak` containing the previous valid configuration after a subsequent successful
+save. A first save has no previous configuration to back up. All runtime JSON files
+are ignored by Git. Keep both configurations together to preserve cycle references.
+
+V2 saves are immediate and read back before publishing the new configuration.
+Failed writes keep the previous live configuration, but can leave a partial primary
+file on disk; inspect it before restart. Invalid/missing primary storage with a
+backup present locks editing, without automatically restoring old activation.
+Repair deliberately while stopped. A corrupt region file also blocks cycle deletion
+because the service cannot prove the cycle is unused.
+
+Storage is independent of ordinary environment persistence. `state.json` and
+`admin.json` keep their existing formats. Cycle definition schema 1 remains readable
+with 20 °C; editor saves use schema 2. The cycle container remains schema 1. Region
+storage uses schema 1. Old `cycle_import.json` files are no longer read.
+
+See [V2 usage and rollback](../Instructions/V2_GEBRUIK.md).
 
 This folder must remain present and writable by FXServer.
 
 `state.json`, `state.json.bak`, `admin.json` and `admin.json.bak` are created automatically during runtime and are ignored by Git. Do not share these files with other servers: admin storage contains player identifiers and permissions.
 
-Before updating the resource, stop it normally and create a backup outside the resource of all four files. Keep the backup until the new code has been confirmed to work correctly.
+Before updating the resource, stop it normally and create a backup outside the resource of all environment, admin, cycle and region files and their backups. Keep the backup until the new code has been confirmed to work correctly.
 
 ## Environment
 

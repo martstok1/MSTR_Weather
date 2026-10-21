@@ -73,6 +73,8 @@ RegisterNetEvent('mstr_weather:client:uiSnapshot', function(payload)
         or type(payload.settings) ~= 'table' then return end
 
     lastResponse = GetGameTimer()
+    local temp,_,region,weather=MSTR.ClientRegions.Environment()
+    payload.localEnvironment={temperature=temp,region=region,weather=weather}
     SetNuiFocus(true, true)
     SendNUIMessage({ action = 'snapshot', payload = payload })
 end)

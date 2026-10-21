@@ -1,3 +1,7 @@
+> **Historisch document:** deze commando's gelden uitsluitend voor de oorspronkelijke
+> Fase 2-commit. In 2.0.0-rc.1 is de bediening geïntegreerd in het V1-menu en zijn
+> de tijdelijke commando's verwijderd. Gebruik [V2_GEBRUIK.md](V2_GEBRUIK.md).
+
 # V2 Fase 2 — cyclusopslag en globale uitvoering
 
 Versie: 2.0.0-dev.2. Implementatie gereed voor ingame validatie; geen definitieve release.

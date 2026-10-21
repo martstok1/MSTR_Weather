@@ -6,6 +6,7 @@ local ClientWeather = MSTR.ClientWeather
 local applySerial = 0
 local synced = false
 local snowApplied = nil
+local visual,bridgeSerial,bridging=nil,0,false
 local rainWeathers = { RAIN = true, THUNDER = true, CLEARING = true, NEUTRAL = true, HALLOWEEN = true }
 
 local function ApplySnowEffects(weatherType)
@@ -19,6 +20,7 @@ local function ApplySnowEffects(weatherType)
 end
 
 local function ApplyStableWeather(weatherType)
+    visual={from=weatherType,target=weatherType,progress=1}
     SetWeatherTypeNowPersist(weatherType)
     ApplySnowEffects(weatherType)
     -- Let precipitation weather choose its own level; explicitly end dry-weather
@@ -71,6 +73,7 @@ function ClientWeather.ApplySync(payload)
     -- SetWeatherTypeTransition takes a blend fraction (0=from, 1=target).
     -- Apply the received fraction immediately: never reset a late join to from.
     local function ApplyProgress(progress)
+        visual={from=from,target=target,progress=progress}
         SetWeatherTypeTransition(fromHash, targetHash, progress + 0.0)
         ApplySnowEffects(progress < 0.5 and from or target)
     end
@@ -95,12 +98,59 @@ end
 
 RegisterNetEvent('mstr_weather:client:weatherSync', function(payload)
     if source ~= 65535 then return end
-    ClientWeather.ApplySync(payload)
+    if MSTR.ClientRegions then MSTR.ClientRegions.Global(payload) else ClientWeather.ApplySync(payload) end
 end)
+
+-- A GTA blend has two endpoints. Resolve an interrupted blend continuously before
+-- introducing a third weather; never snap to a guessed dominant endpoint.
+function ClientWeather.Route(provider,seconds,preserveBridge)
+    if preserveBridge and bridging and not seconds then return end
+    bridgeSerial=bridgeSerial+1
+    local token=bridgeSerial
+    if not visual or not seconds or seconds<=0 then bridging=false;return ClientWeather.ApplySync(provider()) end
+    bridging=true
+    applySerial=applySerial+1
+    local initial={from=visual.from,target=visual.target,progress=visual.progress}
+    CreateThread(function()
+        local function segment(from,to,startProgress,endProgress,duration)
+            local start=GetGameTimer()
+            while token==bridgeSerial do
+                local t=math.min(1,MSTR.Utils.ElapsedMs(GetGameTimer(),start)/(duration*1000))
+                local progress=startProgress+(endProgress-startProgress)*t
+                visual={from=from,target=to,progress=progress}
+                SetWeatherTypeTransition(GetHashKey(from),GetHashKey(to),progress+0.0)
+                ApplySnowEffects(progress<0.5 and from or to)
+                SetRainLevel(-1.0)
+                if t>=1 then return true end
+                Wait(100)
+            end
+            return false
+        end
+        local part=seconds/3
+        if not segment(initial.from,initial.target,initial.progress,1,part) then return end
+        local p=provider()
+        if not segment(initial.target,p.currentWeather,0,1,part) then return end
+        local start=GetGameTimer()
+        while token==bridgeSerial do
+            local current=provider()
+            if current.currentWeather~=p.currentWeather or current.targetWeather~=p.targetWeather then
+                ClientWeather.Route(provider,seconds);return
+            end
+            local t=math.min(1,MSTR.Utils.ElapsedMs(GetGameTimer(),start)/(part*1000))
+            local fraction=current.transitionDuration>0 and math.min(1,current.transitionElapsed/current.transitionDuration) or 1
+            visual={from=p.currentWeather,target=p.targetWeather,progress=t*fraction}
+            SetWeatherTypeTransition(GetHashKey(visual.from),GetHashKey(visual.target),visual.progress+0.0)
+            ApplySnowEffects(visual.progress<0.5 and visual.from or visual.target)
+            if t>=1 then bridging=false;ClientWeather.ApplySync(current);return end
+            Wait(100)
+        end
+    end)
+end
 
 AddEventHandler('onClientResourceStop', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
     applySerial = applySerial + 1
+    bridgeSerial=bridgeSerial+1
     synced = false
     ForceSnowPass(false)
     SetForceVehicleTrails(false)

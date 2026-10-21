@@ -35,6 +35,8 @@ MSTR.WeatherEngine.Initialize()
 MSTR.TimeEngine.Initialize()
 MSTR.Persistence.SetReady()
 MSTR.Cycles.Initialize()
+MSTR.Regions.Initialize()
+MSTR.Regions.Start()
 MSTR.Logging.Record('startup', nil, MSTR.State.GetSnapshot(), { origin = 'startup' })
 
 local syncRequestTimes = {}
@@ -60,6 +62,7 @@ RegisterNetEvent('mstr_weather:server:requestSync', function()
     syncRequestTimes[playerSource] = now
     MSTR.WeatherEngine.SyncPlayer(playerSource)
     MSTR.TimeEngine.SyncPlayer(playerSource)
+    MSTR.Regions.Refresh(true,playerSource)
 end)
 
 AddEventHandler('playerDropped', function()
@@ -110,8 +113,8 @@ RegisterAdminCommand(Config.General.WeatherCommand, function(source, args)
 
     if MSTR.Cycles.IsActive() then
         SendMessage(source, Config.General.Locale == 'nl'
-            and 'Er is een weercyclus actief. Laat de hoofdadmin deze eerst stoppen met /mstrcycle.'
-            or 'A weather cycle is active. Ask the superadmin to stop it with /mstrcycle first.')
+            and 'Er is een weercyclus actief. De hoofdadmin kan deze stoppen in Weercycli.'
+            or 'A weather cycle is active. The superadmin can stop it under Weather cycles.')
         return
     end
 

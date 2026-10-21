@@ -52,4 +52,5 @@
     draw('dynamic-icon', state.dynamicWeather ? 'cycle' : 'pause');
     draw('blackout-icon', state.blackout ? 'bulbOff' : 'bulb');
   };
+  window.MSTRWeatherSVG = type => '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + parts[weather[type] || 'cloud'] + '</svg>';
 })();

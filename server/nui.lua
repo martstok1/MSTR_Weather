@@ -33,7 +33,7 @@ end)
 local actionRights = {
     weather = 'weather', time = 'time', freeze = 'time', scale = 'time',
     dynamic = 'dynamic', blackout = 'blackout',
-    panel = 'manage', settings = 'manage', user = 'manage', logs = 'manage'
+    panel = 'manage', settings = 'manage', user = 'manage', logs = 'manage', v2 = 'manage'
 }
 
 local function Perform(player, action, p)
@@ -42,6 +42,27 @@ local function Perform(player, action, p)
     if not MSTR.Permissions.Can(player, right) then return false, 'forbidden' end
     if type(p) ~= 'table' then return false, 'invalid' end
     local actor = { player = player, origin = 'nui' }
+    if action=='v2' then
+        if type(p.op)~='string' or #p.op>16 then return false,'invalid' end
+        if p.raw~=nil and (type(p.raw)~='string' or #p.raw>262144) then return false,'invalid' end
+        local ok,result,locked
+        if p.kind=='all' and p.op=='list' then
+            local _,cycles,cycleLocked=MSTR.Cycles.Request(player,'list',nil,nil,nil,true)
+            local _,regions=MSTR.Regions.Request(player,'list')
+            return true,nil,nil,nil,{kind='all',cycles={document=cycles,locked=cycleLocked},regions=regions}
+        end
+        if p.kind=='cycles' then
+            ok,result,locked=MSTR.Cycles.Request(player,p.op,p.revision,p.id,p.raw,true)
+            if ok then
+                local _,document,isLocked=MSTR.Cycles.Request(player,'list',nil,nil,nil,true)
+                return true,nil,nil,nil,{kind='cycles',document=document,locked=isLocked}
+            end
+        elseif p.kind=='regions' then
+            ok,result=MSTR.Regions.Request(player,p.op,p.revision,p.id,p.raw)
+            if ok then result.kind='regions';return true,nil,nil,nil,result end
+        else return false,'invalid' end
+        return false,result
+    end
     if action == 'logs' then
         local page, reason = MSTR.Logging.GetPage(player, p.before)
         return page ~= nil, reason, nil, page
@@ -54,7 +75,14 @@ local function Perform(player, action, p)
     elseif action == 'weather' then
         if not MSTR.Utils.IsValidWeatherType(p.weather) or type(p.instant) ~= 'boolean' then return false, 'invalid' end
         if p.instant and not Config.Weather.AllowInstantChange then return false, 'instant_disabled' end
-        return MSTR.WeatherEngine.SetWeather(p.weather, p.instant, actor)
+        if MSTR.Cycles.IsActive() then
+            if p.stopCycle~=true then return false,'cycle_active' end
+            local ok,reason=MSTR.Cycles.Request(player,'stop',p.cycleRevision,'confirm',nil,true)
+            if not ok then return false,reason end
+        end
+        local ok,reason=MSTR.WeatherEngine.SetWeather(p.weather, p.instant, actor)
+        if ok then MSTR.WeatherEngine.SetDynamicWeather(false,actor) end
+        return ok,reason
     elseif action == 'time' then
         return MSTR.TimeEngine.SetTime(p.hour, p.minute, actor)
     elseif action == 'scale' then
@@ -62,6 +90,12 @@ local function Perform(player, action, p)
     elseif action == 'freeze' then
         return MSTR.TimeEngine.SetTimeFrozen(p.value, actor)
     elseif action == 'dynamic' then
+        if type(p.value)~='boolean' then return false,'invalid' end
+        if MSTR.Cycles.IsActive() then
+            if p.stopCycle~=true then return false,'cycle_active' end
+            local ok,reason=MSTR.Cycles.Request(player,'stop',p.cycleRevision,'confirm',nil,true)
+            if not ok then return false,reason end
+        end
         return MSTR.WeatherEngine.SetDynamicWeather(p.value, actor)
     elseif action == 'blackout' then
         if not MSTR.State.SetBlackout(p.value, actor) then return false, 'invalid' end
@@ -81,11 +115,11 @@ RegisterNetEvent('mstr_weather:server:uiAction', function(requestId, action, pay
         end
         return
     end
-    local ok, reason, panel, logs = Perform(player, action, payload)
+    local ok, reason, panel, logs, v2 = Perform(player, action, payload)
     if ok and (action == 'user' or action == 'settings') then panel = MSTR.Admin.GetPanel(player) end
     TriggerClientEvent('mstr_weather:client:uiAction', player, {
         requestId = requestId, ok = ok == true, reason = reason or (not ok and 'invalid' or nil),
-        panel = panel, logs = logs, snapshot = Snapshot(player)
+        panel = panel, logs = logs, v2 = v2, snapshot = Snapshot(player)
     })
 end)
 
